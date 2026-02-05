@@ -1,48 +1,35 @@
 import streamlit as st
-from PIL import Image
-import os
-
-# --- PAGE SETUP ---
-st.set_page_config(page_title="TUKLAS", page_icon="🐷")
-st.title("🐷 TUKLAS: Pig Skin Lesion Detection")
-
-# --- DEBUG INFO (To help us if it fails) ---
+import subprocess
 import sys
+
+st.set_page_config(page_title="TUKLAS Spy", layout="wide")
+st.title("🕵️ TUKLAS System Spy")
+
+st.write("Checking installed libraries...")
+
+# 1. Ask the computer to list everything it has installed
 try:
-    import ultralytics
-    from ultralytics import YOLO
-    st.success("✅ AI Brain (Ultralytics) is installed!")
-except ImportError as e:
-    st.error(f"❌ Critical Error: The 'ultralytics' library is missing.")
-    st.info("Please check your 'requirements.txt' file on GitHub.")
-    st.stop()
-
-# --- PATH SETUP ---
-folder = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(folder, "best.pt")
-
-# --- MODEL LOADING ---
-if not os.path.exists(model_path):
-    st.error(f"❌ Error: Cannot find 'best.pt' in {folder}")
-else:
-    @st.cache_resource
-    def load_model():
-        return YOLO(model_path)
-
-    try:
-        with st.spinner("Starting AI Engine..."):
-            model = load_model()
-        
-        # --- UPLOAD & DETECT ---
-        file = st.file_uploader("Upload Image", type=['jpg', 'png', 'jpeg'])
-        if file:
-            img = Image.open(file)
-            st.image(img, caption="Original", width=300)
+    # Run 'pip list' to get a full inventory
+    result = subprocess.check_output([sys.executable, "-m", "pip", "list"], encoding='utf-8')
+    
+    # Display the result in a text box
+    st.text_area("📦 INSTALLED PACKAGES:", result, height=400)
+    
+    # Check specifically for the ones we need
+    required = ["ultralytics", "torch", "opencv-python", "opencv-python-headless"]
+    st.subheader("🔍 Critical Check:")
+    
+    for lib in required:
+        if lib in result:
+            st.success(f"✅ {lib} is installed!")
+        else:
+            st.error(f"❌ {lib} is MISSING.")
             
-            if st.button("🔍 Scan Image"):
-                results = model(img)
-                res_plotted = results[0].plot()
-                st.image(res_plotted, caption="Detection Result")
-                
-    except Exception as e:
-        st.error(f"Runtime Error: {e}")
+except Exception as e:
+    st.error(f"Spy failed: {e}")
+
+# 2. Check where the computer is looking for files
+st.subheader("📂 Current Folder:")
+import os
+st.code(os.getcwd())
+st.write("Files here:", os.listdir("."))
