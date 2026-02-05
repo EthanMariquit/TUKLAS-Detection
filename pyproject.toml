@@ -1,0 +1,11 @@
+[project]
+name = "tuklas-app"
+version = "0.1.0"
+description = "Pig Skin Lesion Detection"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "streamlit",
+    "opencv-python-headless",
+    "ultralytics",
+]
