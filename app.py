@@ -1,73 +1,39 @@
 import streamlit as st
+from PIL import Image
 import os
+
+# --- PAGE SETUP ---
+st.set_page_config(page_title="TUKLAS", page_icon="🐷")
+st.title("🐷 TUKLAS: Pig Skin Lesion Detection")
+
+# --- DEBUG INFO (To help us if it fails) ---
 import sys
-import subprocess
-import importlib.util
-
-# --- 1. THE "NO-FAIL" INSTALLER ---
-# This function uses only standard Python tools to check and install
-def ensure_library(name, package_name=None):
-    if package_name is None:
-        package_name = name
-        
-    # Check if installed using standard 'importlib' (No pkg_resources needed)
-    if importlib.util.find_spec(name) is None:
-        st.warning(f"⚙️ Installing {name}... (This may take 2 minutes)")
-        try:
-            # Install to USER folder to avoid Permission Error
-            subprocess.check_call([
-                sys.executable, "-m", "pip", "install", 
-                "--user", package_name, "--quiet"
-            ])
-            st.success(f"✅ {name} installed!")
-        except Exception as e:
-            st.error(f"❌ Failed to install {name}: {e}")
-            st.stop()
-
-# --- 2. RUN INSTALL CHECKS ---
-# We force these checks before anything else loads
 try:
-    # 1. Install Streamlit (Just in case)
-    ensure_library("streamlit")
-    
-    # 2. Install Ultralytics (The AI Brain)
-    ensure_library("ultralytics")
-    
-    # --- CRITICAL: ADD INSTALL FOLDER TO PATH ---
-    import site
-    import importlib
-    importlib.reload(site)
-    
-except Exception as e:
-    st.error(f"Setup Error: {e}")
-
-# --- 3. THE ACTUAL APP CODE ---
-try:
+    import ultralytics
     from ultralytics import YOLO
-    from PIL import Image
+    st.success("✅ AI Brain (Ultralytics) is installed!")
+except ImportError as e:
+    st.error(f"❌ Critical Error: The 'ultralytics' library is missing.")
+    st.info("Please check your 'requirements.txt' file on GitHub.")
+    st.stop()
 
-    # Page Config
-    st.set_page_config(page_title="TUKLAS", page_icon="🐷")
-    st.title("🐷 TUKLAS: Pig Skin Lesion Detection")
+# --- PATH SETUP ---
+folder = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(folder, "best.pt")
 
-    # Path Setup
-    folder = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(folder, "best.pt")
+# --- MODEL LOADING ---
+if not os.path.exists(model_path):
+    st.error(f"❌ Error: Cannot find 'best.pt' in {folder}")
+else:
+    @st.cache_resource
+    def load_model():
+        return YOLO(model_path)
 
-    # Load Model
-    if not os.path.exists(model_path):
-        st.error(f"❌ Error: Cannot find 'best.pt' in {folder}")
-    else:
-        @st.cache_resource
-        def load_model():
-            return YOLO(model_path)
-
+    try:
         with st.spinner("Starting AI Engine..."):
             model = load_model()
         
-        st.success("✅ System Online")
-
-        # Upload
+        # --- UPLOAD & DETECT ---
         file = st.file_uploader("Upload Image", type=['jpg', 'png', 'jpeg'])
         if file:
             img = Image.open(file)
@@ -76,14 +42,7 @@ try:
             if st.button("🔍 Scan Image"):
                 results = model(img)
                 res_plotted = results[0].plot()
-                
-                # --- THIS WAS THE ERROR LINE (FIXED NOW) ---
                 st.image(res_plotted, caption="Detection Result")
-
-except ImportError:
-    st.warning("⚠️ Installation complete. Please click 'Rerun' in the top right corner!")
-    if st.button("Rerun App"):
-        st.rerun()
-
-except Exception as e:
-    st.error(f"Runtime Error: {e}")
+                
+    except Exception as e:
+        st.error(f"Runtime Error: {e}")
