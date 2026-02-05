@@ -27,26 +27,21 @@ def ensure_library(name, package_name=None):
 # --- 2. RUN INSTALL CHECKS ---
 # We force these checks before anything else loads
 try:
-    # 1. Install Streamlit (Just in case, though it should be there)
+    # 1. Install Streamlit (Just in case)
     ensure_library("streamlit")
     
     # 2. Install Ultralytics (The AI Brain)
-    # We install specifically without dependencies first to avoid conflicts, then let it resolve
     ensure_library("ultralytics")
     
     # --- CRITICAL: ADD INSTALL FOLDER TO PATH ---
-    # Since we installed with '--user', we must tell Python where to look
     import site
     import importlib
-    
-    # Reload site packages to find the new files
     importlib.reload(site)
     
 except Exception as e:
     st.error(f"Setup Error: {e}")
 
 # --- 3. THE ACTUAL APP CODE ---
-# Now we can safely import everything
 try:
     from ultralytics import YOLO
     from PIL import Image
@@ -81,4 +76,14 @@ try:
             if st.button("🔍 Scan Image"):
                 results = model(img)
                 res_plotted = results[0].plot()
-                st.image(res_plotted
+                
+                # --- THIS WAS THE ERROR LINE (FIXED NOW) ---
+                st.image(res_plotted, caption="Detection Result")
+
+except ImportError:
+    st.warning("⚠️ Installation complete. Please click 'Rerun' in the top right corner!")
+    if st.button("Rerun App"):
+        st.rerun()
+
+except Exception as e:
+    st.error(f"Runtime Error: {e}")
