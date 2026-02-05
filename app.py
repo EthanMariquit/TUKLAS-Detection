@@ -2,75 +2,83 @@ import streamlit as st
 import os
 import sys
 import subprocess
-import pkg_resources
+import importlib.util
 
-# --- PART 1: DIAGNOSTIC & STEALTH INSTALL ---
-st.set_page_config(page_title="TUKLAS Debugger")
-st.title("🛠️ TUKLAS: Diagnostics & Recovery")
+# --- 1. THE "NO-FAIL" INSTALLER ---
+# This function uses only standard Python tools to check and install
+def ensure_library(name, package_name=None):
+    if package_name is None:
+        package_name = name
+        
+    # Check if installed using standard 'importlib' (No pkg_resources needed)
+    if importlib.util.find_spec(name) is None:
+        st.warning(f"⚙️ Installing {name}... (This may take 2 minutes)")
+        try:
+            # Install to USER folder to avoid Permission Error
+            subprocess.check_call([
+                sys.executable, "-m", "pip", "install", 
+                "--user", package_name, "--quiet"
+            ])
+            st.success(f"✅ {name} installed!")
+        except Exception as e:
+            st.error(f"❌ Failed to install {name}: {e}")
+            st.stop()
 
-# 1. Show us exactly what files exist in the cloud folder
-st.subheader("📂 Cloud File Check")
-files = os.listdir(".")
-st.write("Files found in current folder:", files)
-
-# Check specifically for requirements.txt errors
-if "requirements.txt" in files:
-    st.success("✅ 'requirements.txt' was found.")
-elif "requirements.txt.txt" in files:
-    st.error("❌ FOUND ERROR: File is named 'requirements.txt.txt'. Rename it on GitHub!")
-else:
-    st.warning("⚠️ 'requirements.txt' is MISSING from this folder.")
-
-# 2. Force Install "User Mode" (Bypasses Permission Error)
+# --- 2. RUN INSTALL CHECKS ---
+# We force these checks before anything else loads
 try:
-    import ultralytics
-    st.success("✅ Ultralytics is already installed!")
-except ImportError:
-    st.warning("⚙️ Ultralytics missing. Attempting Stealth Install...")
-    try:
-        # The flag '--user' installs it in a folder we are ALLOWED to write to
-        subprocess.check_call([
-            sys.executable, "-m", "pip", "install", 
-            "--user", "ultralytics", "--no-warn-script-location"
-        ])
-        
-        # We must tell Python where the new 'user' folder is
-        # Add the local user site-packages to the path
-        user_site = subprocess.check_output([sys.executable, "-m", "site", "--user-site"]).decode().strip()
-        if user_site not in sys.path:
-            sys.path.append(user_site)
-            
-        import ultralytics
-        st.success("🎉 Stealth Install SUCCESS! Reloading...")
-        st.experimental_rerun()
-        
-    except Exception as e:
-        st.error(f"❌ Install Failed: {e}")
+    # 1. Install Streamlit (Just in case, though it should be there)
+    ensure_library("streamlit")
+    
+    # 2. Install Ultralytics (The AI Brain)
+    # We install specifically without dependencies first to avoid conflicts, then let it resolve
+    ensure_library("ultralytics")
+    
+    # --- CRITICAL: ADD INSTALL FOLDER TO PATH ---
+    # Since we installed with '--user', we must tell Python where to look
+    import site
+    import importlib
+    
+    # Reload site packages to find the new files
+    importlib.reload(site)
+    
+except Exception as e:
+    st.error(f"Setup Error: {e}")
 
-# --- PART 2: THE ACTUAL APP ---
-# Only run this if installation succeeded
-if 'ultralytics' in sys.modules:
+# --- 3. THE ACTUAL APP CODE ---
+# Now we can safely import everything
+try:
     from ultralytics import YOLO
     from PIL import Image
 
+    # Page Config
+    st.set_page_config(page_title="TUKLAS", page_icon="🐷")
+    st.title("🐷 TUKLAS: Pig Skin Lesion Detection")
+
+    # Path Setup
     folder = os.path.dirname(os.path.abspath(__file__))
     model_path = os.path.join(folder, "best.pt")
 
+    # Load Model
     if not os.path.exists(model_path):
-        st.error(f"❌ 'best.pt' NOT FOUND. (Is it named 'best (3).pt'?)")
+        st.error(f"❌ Error: Cannot find 'best.pt' in {folder}")
     else:
-        # Load Model
-        model = YOLO(model_path)
+        @st.cache_resource
+        def load_model():
+            return YOLO(model_path)
+
+        with st.spinner("Starting AI Engine..."):
+            model = load_model()
         
-        st.markdown("---")
-        st.header("🐷 Pig Lesion Detection")
-        
+        st.success("✅ System Online")
+
+        # Upload
         file = st.file_uploader("Upload Image", type=['jpg', 'png', 'jpeg'])
         if file:
             img = Image.open(file)
             st.image(img, caption="Original", width=300)
             
-            if st.button("Run Detection"):
+            if st.button("🔍 Scan Image"):
                 results = model(img)
                 res_plotted = results[0].plot()
-                st.image(res_plotted, caption="Result")
+                st.image(res_plotted
