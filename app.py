@@ -53,3 +53,4 @@ else:
 
     except Exception as e:
         st.error(f"An error occurred while loading the model: {e}")
+
