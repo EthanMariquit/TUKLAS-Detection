@@ -11,9 +11,6 @@ dependencies = [
     "requests",
     "fpdf",
     "pillow",
-    "streamlit-mic-recorder",  # <--- NEW: For Microphone Button
-    "SpeechRecognition",       # <--- NEW: For Voice Command Processing
+    "streamlit-mic-recorder",
+    "SpeechRecognition"
 ]
-
-[tool.poetry]
-package-mode = false
