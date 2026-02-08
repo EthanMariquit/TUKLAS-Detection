@@ -323,7 +323,11 @@ if selected_page == "🔍 Lesion Scanner":
                 else:
                     det_class = unique_detections[0] 
                     report = generate_smart_report(det_class, count, confidence)
-                    st.markdown(f'<div class="report-box">{report}</div>', unsafe_allow_html=True)
+                    
+                    # --- WRAPPED THE REPORT IN AN EXPANDER ---
+                    with st.expander("📋 AI DIAGNOSTIC REPORT", expanded=True):
+                        st.markdown(f'<div class="report-box">{report}</div>', unsafe_allow_html=True)
+                    
                     st.write("") 
 
                     # --- DETAILED PROTOCOL SECTION ---
@@ -346,19 +350,19 @@ if selected_page == "🔍 Lesion Scanner":
                                 c1, c2 = st.columns(2)
                                 with c1:
                                     st.markdown('<p class="proto-header">🧬 Origin & Transmission</p>', unsafe_allow_html=True)
-                                    st_blue(info['cause']) # Replaced st.info with st_blue
+                                    st_blue(info['cause']) 
                                 with c2:
                                     st.markdown('<p class="proto-header">💔 Clinical Impact</p>', unsafe_allow_html=True)
-                                    st_red(info['harm']) # Replaced st.error with st_red
+                                    st_red(info['harm']) 
                                 
                                 # SECTION 3: MATERIALS & PREVENTION (2 Cols)
                                 c3, c4 = st.columns(2)
                                 with c3:
                                     st.markdown('<p class="proto-header">🧰 Required Supplies</p>', unsafe_allow_html=True)
-                                    st_yellow(info['materials']) # Replaced st.warning with st_yellow
+                                    st_yellow(info['materials']) 
                                 with c4:
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
-                                    st_purple(info["prevention"]) # Already using st_purple
+                                    st_purple(info["prevention"])
                                 
                                 st.divider()
                                 
@@ -370,7 +374,7 @@ if selected_page == "🔍 Lesion Scanner":
                                 for step in info['steps']:
                                     protocol_text += f"✅ {step}\n\n"
                                 
-                                st_green(protocol_text) # Replaced st.success with st_green
+                                st_green(protocol_text) 
 
 # --- 10. PAGE: DIRECTORY ---
 elif selected_page == "📞 Local Directory":
