@@ -175,6 +175,9 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.set_auto_page_break(auto=True, margin=25)
     pdf.add_page()
     
+    # --- MOVED DOWN HERE ---
+    pdf.ln(10) # <--- ADDED EXTRA SPACING SO IT DOESNT TOUCH HEADER
+    
     # --- SECTION 1: PATIENT / CASE INFORMATION (Grid Layout) ---
     pdf.set_font("Arial", "B", 10)
     pdf.set_fill_color(240, 240, 240) # Light Gray Header
