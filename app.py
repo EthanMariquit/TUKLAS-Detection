@@ -406,4 +406,175 @@ with st.sidebar:
     if lottie_microscope:
         st_lottie(lottie_microscope, height=150, key="sidebar_anim")
     else:
-        st.image("
+        st.image("https://img.icons8.com/fluency/96/microscope.png", width=80)
+        
+    st.title("TUKLAS Diagnostics")
+    st.caption("Veterinary Skin Lesion Analysis System")
+    st.markdown("---")
+    
+    selected_page = st.selectbox("Navigate", ["🔍 Lesion Scanner", "📞 Local Directory"])
+    
+    # --- DOSAGE CALCULATOR ---
+    st.markdown("---")
+    st.subheader("💊 Rx Dosage Calculator")
+    st.caption("Calculate injection volume based on body weight.")
+    
+    calc_weight = st.number_input("Pig Weight (kg)", min_value=1.0, value=50.0, step=0.5)
+    
+    drug_options = ["Select Drug..."] + [v['drug_name'] for k, v in medical_data.items() if 'drug_name' in v]
+    selected_drug = st.selectbox("Medication", drug_options)
+    
+    if selected_drug != "Select Drug...":
+        drug_info = next((v for k, v in medical_data.items() if v.get('drug_name') == selected_drug), None)
+        if drug_info:
+            vol = (calc_weight / drug_info['dosage_per_kg']) * drug_info['dosage_rate']
+            st.info(f"**Administer:** {vol:.2f} mL")
+            st.caption(f"Dosage Rate: {drug_info['dosage_rate']}mL per {drug_info['dosage_per_kg']}kg")
+        else:
+            st.error("Drug data unavailable.")
+    
+    st.markdown("---")
+
+    conf_threshold = 0.25
+    if selected_page == "🔍 Lesion Scanner":
+        st.write("⚙️ **Scanner Settings**")
+        conf_threshold = st.slider("Sensitivity", 0.0, 1.0, 0.40, 0.05)
+        st.info("ℹ️ **Usage Guide**\n1. Upload a clear image of the skin.\n2. The AI will highlight anomalies.\n3. Download the official PDF Report.")
+
+# --- 10. PAGE: LESION SCANNER ---
+if selected_page == "🔍 Lesion Scanner":
+    st.title("🔬 TUKLAS: Smart Veterinary Assistant")
+    st.write("Upload a sample image to generate a diagnostic report.")
+
+    uploaded_file = st.file_uploader("Upload Image", type=['jpg', 'png', 'jpeg'])
+
+    if uploaded_file:
+        img = Image.open(uploaded_file)
+        
+        with open("temp_analysis.jpg", "wb") as f:
+            f.write(uploaded_file.getbuffer())
+
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            st.image(img, use_container_width=True, caption="Uploaded Specimen")
+
+        if st.button("🔍 Generate Report"):
+            if model is None:
+                st.error("Model file missing.")
+            else:
+                with st.spinner("Analyzing..."):
+                    with col2:
+                        if lottie_scanning:
+                            st_lottie(lottie_scanning, height=200, key="scanning")
+                    
+                    results = model.predict(img, conf=conf_threshold)
+                    result_plot = results[0].plot()
+                    
+                    detected_classes = [model.names[int(box.cls)] for box in results[0].boxes]
+                    unique_detections = list(set(detected_classes))
+                    count = len(detected_classes)
+                    
+                    confidence = 0.0
+                    if len(results[0].boxes) > 0:
+                        confs = results[0].boxes.conf.tolist()
+                        confidence = (sum(confs) / len(confs)) * 100
+
+                with col2:
+                    st.empty()
+                    st.image(result_plot, use_container_width=True, caption="AI Analysis")
+                    if count > 0:
+                        st.metric(label="AI Confidence Score", value=f"{confidence:.1f}%")
+                        st.progress(int(confidence))
+
+                st.markdown("---")
+                if count == 0:
+                    st_green("✅ <b>Negative Result:</b> No skin lesions detected.")
+                else:
+                    det_class = unique_detections[0] 
+                    report = generate_smart_report(det_class, count, confidence)
+                    
+                    info = medical_data.get(det_class)
+                    if not info:
+                         for k in medical_data.keys():
+                            if k in det_class or det_class in k:
+                                info = medical_data[k]
+                                break
+
+                    with st.expander("📋 AI DIAGNOSTIC REPORT", expanded=True):
+                        st.markdown(f'<div class="report-box">{report}</div>', unsafe_allow_html=True)
+                        
+                        if info:
+                            pdf_bytes = create_pdf("temp_analysis.jpg", det_class, confidence, info)
+                            st.download_button(
+                                label="📥 Download Official Lab Report (PDF)",
+                                data=pdf_bytes,
+                                file_name=f"TUKLAS_Report_{int(time.time())}.pdf",
+                                mime="application/pdf"
+                            )
+                    
+                    st.write("") 
+
+                    for d in unique_detections:
+                        d_info = medical_data.get(d)
+                        if not d_info:
+                            for k in medical_data.keys():
+                                if k in d or d in k:
+                                    d_info = medical_data[k]
+                                    break
+                        
+                        if d_info:
+                            with st.expander(f"📌 PROTOCOL: {d}", expanded=True):
+                                st.markdown(f'<p style="margin-bottom: 0px;"><b>SEVERITY STATUS:</b> <code>{d_info["severity"]}</code></p>', unsafe_allow_html=True)
+                                st.divider()
+                                
+                                c1, c2 = st.columns(2)
+                                with c1:
+                                    st.markdown('<p class="proto-header">🧬 Origin & Transmission</p>', unsafe_allow_html=True)
+                                    st_blue(d_info['cause']) 
+                                with c2:
+                                    st.markdown('<p class="proto-header">💔 Clinical Impact</p>', unsafe_allow_html=True)
+                                    st_red(d_info['harm']) 
+                                
+                                c3, c4 = st.columns(2)
+                                with c3:
+                                    st.markdown('<p class="proto-header">🧰 Required Supplies</p>', unsafe_allow_html=True)
+                                    st_yellow(d_info['materials']) 
+                                with c4:
+                                    st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
+                                    st_purple(d_info["prevention"])
+                                
+                                st.divider()
+                                
+                                st.markdown('<p class="proto-header">💊 Treatment Protocol</p>', unsafe_allow_html=True)
+                                protocol_text = ""
+                                for step in d_info['steps']:
+                                    protocol_text += f"✅ {step}\n"
+                                st_green(protocol_text) 
+
+elif selected_page == "📞 Local Directory":
+    st.title("📞 Agricultural Support Directory")
+    search_term = st.text_input("🔍 Search Municipality", "")
+    st.markdown("---")
+
+    col1, col2 = st.columns(2)
+    visible = [c for c in contacts_data if search_term.lower() in c['LGU'].lower() or search_term == ""]
+    
+    if len(visible) == 0:
+        st_yellow("No offices found matching your search.")
+
+    for i, data in enumerate(visible):
+        with col1 if i % 2 == 0 else col2:
+            with st.expander(f"📍 **{data['LGU']}**", expanded=True):
+                st.write(f"**Office:** {data['Office']}")
+                st.write(f"**Head:** {data['Head']}")
+                st.write(f"**Phone:** `{data['Contact']}`")
+                st.write(f"**Email:** {data['Email']}")
+
+st.markdown("""
+<div class="footer">
+    <p><strong>Rizal National Science High School (RiSci)</strong><br>
+    📍 J.P. Rizal St., Batingan, Binangonan, Rizal<br>
+    📞 (02) 8652-2197 | ✉️ rnshs.admin@deped.gov.ph<br>
+    © 2025 Student Research Project | TUKLAS Team</p>
+</div>
+""", unsafe_allow_html=True)
