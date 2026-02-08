@@ -56,10 +56,9 @@ medical_data = {
             "SUPPORT: Provide electrolytes in water to combat dehydration.",
             "MONITOR: Check temperature twice daily until fever subsides."
         ],
-        # --- NEW DOSAGE DATA ---
         "drug_name": "Penicillin G",
-        "dosage_rate": 1.0, # mL
-        "dosage_per_kg": 10.0 # per kg
+        "dosage_rate": 1.0, 
+        "dosage_per_kg": 10.0 
     },
     "Hyperkeratosis / Crusting (Sarcoptic Mange)": {
         "severity": "MODERATE (Chronic / Contagious)",
@@ -75,7 +74,6 @@ medical_data = {
             "REPEAT: Repeat treatment after 14 days to kill newly hatched eggs.",
             "CLEAN: Scrub the pig with mild soap to remove crusts before spraying."
         ],
-        # --- NEW DOSAGE DATA ---
         "drug_name": "Ivermectin (1%)",
         "dosage_rate": 1.0,
         "dosage_per_kg": 33.0
@@ -94,7 +92,6 @@ medical_data = {
             "HYDRATE: Oral rehydration is critical for survival.",
             "ENVIRONMENT: Ensure the pen is dry and draft-free."
         ],
-        # --- NEW DOSAGE DATA ---
         "drug_name": "Amoxicillin LA",
         "dosage_rate": 1.0,
         "dosage_per_kg": 20.0
@@ -112,7 +109,6 @@ medical_data = {
             "MONITORING: Observe for any changes in appetite or activity.",
             "RECORD: Log the healthy status in your farm inventory."
         ],
-        # --- NEW DOSAGE DATA ---
         "drug_name": "Multivitamins",
         "dosage_rate": 1.0,
         "dosage_per_kg": 10.0
@@ -175,8 +171,8 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.set_auto_page_break(auto=True, margin=25)
     pdf.add_page()
     
-    # --- SPACING FIX: Move down from header ---
-    pdf.ln(2)  # <--- REDUCED FROM 10 TO 2
+    # --- SPACING: PREVIOUSLY REDUCED ---
+    pdf.ln(2) 
     
     # --- SECTION 1: PATIENT / CASE INFORMATION (Grid Layout) ---
     pdf.set_font("Arial", "B", 10)
@@ -188,16 +184,15 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.cell(35, 8, "Case ID:", 1)
     pdf.cell(60, 8, f"TK-{random.randint(10000,99999)}", 1)
     pdf.cell(35, 8, "Date Reported:", 1)
-    # UPDATED DATE FORMAT (Removed Time)
     pdf.cell(60, 8, datetime.datetime.now().strftime('%Y-%m-%d'), 1, 1)
     # Row 2
     pdf.cell(35, 8, "Specimen Type:", 1)
     pdf.cell(60, 8, "Digital Skin Image", 1)
     pdf.cell(35, 8, "Methodology:", 1)
-    # UPDATED METHODOLOGY HERE
     pdf.cell(60, 8, "AI-Computer Vision (YOLOv11)", 1, 1)
     
-    pdf.ln(2) # <--- REDUCED FROM 8 TO 2
+    # --- SPACING: PREVIOUSLY REDUCED ---
+    pdf.ln(2)
 
     # --- SECTION 2: SPECIMEN IMAGE (SHRUNK) ---
     try:
@@ -263,10 +258,10 @@ def create_pdf(img_path, diagnosis, confidence, info):
         pdf.multi_cell(0, 6, clean_step)
         pdf.ln(1)
 
-    # --- SIGNATURE BLOCK (Updated: Unpinned from bottom) ---
-    pdf.ln(15) # Add space after the last item instead of fixing to bottom
+    # --- SIGNATURE BLOCK (Updated: Manual Adjustment) ---
+    pdf.ln(5) # <--- REDUCED FROM 15 TO 5 (Pulls signature up)
     
-    # Check if we are too close to the bottom, if so, add page
+    # Check if we are too close to the bottom (230mm)
     if pdf.get_y() > 230:
         pdf.add_page()
     
