@@ -200,13 +200,14 @@ st.markdown("""
     .report-box {
         background-color: #ffffff;
         color: #333;
-        /* Padding: Top Right Bottom Left */
-        padding: 20px 20px 15px 20px; 
+        /* Increased bottom padding to 35px */
+        padding: 25px 25px 35px 25px; 
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         border-left: 6px solid #0056b3;
         font-size: 16px;
         line-height: 1.6;
+        margin-bottom: 10px;
     }
     
     .proto-header {
