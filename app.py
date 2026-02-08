@@ -29,7 +29,6 @@ lottie_microscope = load_lottieurl("https://lottie.host/0a927e36-6923-424d-8686-
 lottie_scanning = load_lottieurl("https://lottie.host/5a0c301c-6685-4841-8407-1e0078174f46/7Q1a54a72d.json") 
 
 # --- 3. MEDICAL KNOWLEDGE BASE ---
-# UPDATED: Using proper Markdown syntax (- ) and newlines for clean lists
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
         "severity": "🚨 CRITICAL (High Mortality Risk)",
@@ -304,9 +303,26 @@ if selected_page == "🔍 Lesion Scanner":
                                     st.warning(info['materials']) 
                                 with c4:
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
-                                    # REPLACED custom HTML with native Streamlit Success box
-                                    # This ensures it looks exactly parallel to the others
-                                    st.success(info["prevention"])
+                                    
+                                    # --- UPDATED TO PURPLE BOX ---
+                                    # Convert plain text list to styled HTML list for consistency
+                                    items = info["prevention"].strip().split('\n')
+                                    html_items = "".join([f"<li style='margin-bottom:5px;'>{item.replace('- ', '').replace('• ', '')}</li>" for item in items])
+                                    
+                                    st.markdown(f"""
+                                    <div style="
+                                        background-color: #f3e5f5; 
+                                        border: 1px solid #d1c4e9; 
+                                        padding: 16px; 
+                                        border-radius: 8px; 
+                                        color: #4a148c;
+                                        font-size: 16px;
+                                    ">
+                                        <ul style="margin: 0; padding-left: 20px;">
+                                            {html_items}
+                                        </ul>
+                                    </div>
+                                    """, unsafe_allow_html=True)
                                 
                                 st.divider()
                                 
