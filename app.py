@@ -24,21 +24,21 @@ def load_lottieurl(url):
     except:
         return None
 
-# --- 2.5 CUSTOM PURPLE BOX FUNCTION ---
-def st_purple(text):
-    """
-    Creates a custom purple alert box that adapts to Dark Mode.
-    The CSS class 'purple-box' is defined in Section 6.
-    """
-    # .strip() fixes the jagged text issue automatically
-    st.markdown(f'<div class="purple-box">{text.strip()}</div>', unsafe_allow_html=True)
+# --- 2.5 CUSTOM BOX FUNCTIONS (Unified Style) ---
+def custom_box(text, color_class):
+    st.markdown(f'<div class="{color_class}">{text.strip()}</div>', unsafe_allow_html=True)
+
+def st_purple(text): custom_box(text, "purple-box")
+def st_blue(text):   custom_box(text, "blue-box")
+def st_red(text):    custom_box(text, "red-box")
+def st_yellow(text): custom_box(text, "yellow-box")
+def st_green(text):  custom_box(text, "green-box")
 
 # Load Assets
 lottie_microscope = load_lottieurl("https://lottie.host/0a927e36-6923-424d-8686-2484f4791e84/9z4s3l4Y2C.json") 
 lottie_scanning = load_lottieurl("https://lottie.host/5a0c301c-6685-4841-8407-1e0078174f46/7Q1a54a72d.json") 
 
 # --- 3. MEDICAL KNOWLEDGE BASE ---
-# NOTE: strings are aligned left to prevent indentation errors
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
         "severity": "🚨 CRITICAL (High Mortality Risk)",
@@ -148,12 +148,11 @@ contacts_data = [
     {"LGU": "Teresa", "Office": "Municipal Agriculture Office", "Head": "Department Head", "Contact": "Walk-in Recommended", "Email": "agriculture@teresarizal.gov.ph"},
 ]
 
-# --- 6. CSS STYLING ---
+# --- 6. CSS STYLING (THEMED) ---
 st.markdown("""
     <style>
     .main { background-color: #f8f9fa; }
     
-    /* 1. BUTTON STYLING */
     .stButton>button {
         width: 100%;
         background-color: #0056b3;
@@ -164,25 +163,40 @@ st.markdown("""
         border: none;
     }
 
-    /* 2. ADD BORDERS TO STANDARD BOXES */
-    div[data-baseweb="notification"] {
-        border: 1px solid rgba(0, 0, 0, 0.2);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    /* 3. PURPLE BOX STYLING (Dark Mode Friendly) */
-    .purple-box {
-        background-color: rgba(106, 13, 173, 0.15); 
-        border: 1px solid #6A0DAD;
+    /* --- CUSTOM BOX STYLES --- */
+    /* SHARED PROPERTIES */
+    .purple-box, .blue-box, .red-box, .yellow-box, .green-box {
         padding: 16px;
         border-radius: 5px;
-        color: inherit; 
+        color: inherit;
         font-family: 'Source Sans Pro', sans-serif;
         margin-bottom: 10px;
-        white-space: pre-wrap; 
+        white-space: pre-wrap;
     }
 
-    /* 4. REPORT BOX */
+    /* INDIVIDUAL COLORS */
+    .purple-box {
+        background-color: rgba(106, 13, 173, 0.1); 
+        border: 1px solid #6A0DAD;
+    }
+    .blue-box {
+        background-color: rgba(0, 86, 179, 0.1); 
+        border: 1px solid #0056b3;
+    }
+    .red-box {
+        background-color: rgba(255, 75, 75, 0.1); 
+        border: 1px solid #FF4B4B;
+    }
+    .yellow-box {
+        background-color: rgba(255, 170, 0, 0.1); 
+        border: 1px solid #FFAA00;
+    }
+    .green-box {
+        background-color: rgba(0, 200, 83, 0.1); 
+        border: 1px solid #00C853;
+    }
+
+    /* REPORT BOX */
     .report-box {
         background-color: #ffffff;
         color: #333;
@@ -201,7 +215,7 @@ st.markdown("""
         margin-top: 10px;
     }
     
-    /* 5. FOOTER */
+    /* FOOTER */
     .footer {
         position: fixed;
         left: 0;
@@ -305,7 +319,7 @@ if selected_page == "🔍 Lesion Scanner":
 
                 st.markdown("---")
                 if count == 0:
-                    st.success("✅ **Negative Result:** No skin lesions detected.")
+                    st_green("✅ **Negative Result:** No skin lesions detected.")
                 else:
                     det_class = unique_detections[0] 
                     report = generate_smart_report(det_class, count, confidence)
@@ -332,20 +346,19 @@ if selected_page == "🔍 Lesion Scanner":
                                 c1, c2 = st.columns(2)
                                 with c1:
                                     st.markdown('<p class="proto-header">🧬 Origin & Transmission</p>', unsafe_allow_html=True)
-                                    st.info(info['cause']) 
+                                    st_blue(info['cause']) # Replaced st.info with st_blue
                                 with c2:
                                     st.markdown('<p class="proto-header">💔 Clinical Impact</p>', unsafe_allow_html=True)
-                                    st.error(info['harm']) 
+                                    st_red(info['harm']) # Replaced st.error with st_red
                                 
                                 # SECTION 3: MATERIALS & PREVENTION (2 Cols)
                                 c3, c4 = st.columns(2)
                                 with c3:
                                     st.markdown('<p class="proto-header">🧰 Required Supplies</p>', unsafe_allow_html=True)
-                                    st.warning(info['materials']) 
+                                    st_yellow(info['materials']) # Replaced st.warning with st_yellow
                                 with c4:
-                                    # --- FUNCTION CALL ---
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
-                                    st_purple(info["prevention"])
+                                    st_purple(info["prevention"]) # Already using st_purple
                                 
                                 st.divider()
                                 
@@ -357,7 +370,7 @@ if selected_page == "🔍 Lesion Scanner":
                                 for step in info['steps']:
                                     protocol_text += f"✅ {step}\n\n"
                                 
-                                st.success(protocol_text) 
+                                st_green(protocol_text) # Replaced st.success with st_green
 
 # --- 10. PAGE: DIRECTORY ---
 elif selected_page == "📞 Local Directory":
@@ -369,7 +382,7 @@ elif selected_page == "📞 Local Directory":
     visible = [c for c in contacts_data if search_term.lower() in c['LGU'].lower() or search_term == ""]
     
     if len(visible) == 0:
-        st.warning("No offices found matching your search.")
+        st_yellow("No offices found matching your search.")
 
     for i, data in enumerate(visible):
         with col1 if i % 2 == 0 else col2:
