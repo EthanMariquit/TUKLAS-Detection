@@ -11,15 +11,14 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. EXPANDED MEDICAL KNOWLEDGE BASE ---
-# Added 'Healthy' + New Fields (Materials, Prevention)
+# --- 2. MEDICAL KNOWLEDGE BASE ---
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
         "severity": "🚨 CRITICAL (High Mortality Risk)",
         "cause": "Caused by *Erysipelothrix rhusiopathiae*. Bacteria persists in soil for years. Infection often follows sudden diet changes, stress, or ingestion of contaminated feces.",
         "harm": "Rapid onset of high fever (40-42°C), septicemia (blood poisoning), abortion in pregnant sows, and sudden death if untreated within 24 hours.",
-        "materials": "• Penicillin (Injectable)\n• Sterile Syringes (16G/18G)\n• Digital Thermometer\n• Disinfectant (Phenol-based)\n• Isolation Pen",
-        "prevention": "• Vaccinate breeding herd twice yearly.\n• Quarantine new animals for 30 days.\n• Ensure proper disposal of infected bedding.",
+        "materials": "• Penicillin (Injectable)\n\n• Sterile Syringes (16G/18G)\n\n• Digital Thermometer\n\n• Disinfectant (Phenol-based)\n\n• Isolation Pen",
+        "prevention": "• Vaccinate breeding herd twice yearly.\n\n• Quarantine new animals for 30 days.\n\n• Ensure proper disposal of infected bedding.",
         "steps": [
             "IMMEDIATE: Isolate the affected animal to prevent herd spread.",
             "TREATMENT: Administer Penicillin (1mL/10kg BW) intramuscularly every 12-24 hours.",
@@ -31,8 +30,8 @@ medical_data = {
         "severity": "⚠️ MODERATE (Chronic / Contagious)",
         "cause": "Caused by the mite *Sarcoptes scabiei var. suis*. The mite burrows into the skin to lay eggs. Highly contagious via direct contact or shared rubbing posts.",
         "harm": "Intense itching causes weight loss, poor feed conversion efficiency (FCR), and secondary bacterial infections from scratching open wounds.",
-        "materials": "• Ivermectin or Doramectin\n• Knapsack Sprayer (for amitraz)\n• Skin Scraping Kit (Scalpel/Slide)\n• Protective Gloves",
-        "prevention": "• Treat sows 7-14 days before farrowing to protect piglets.\n• Treat boars every 3 months.\n• Sterilize rubbing posts and walls.",
+        "materials": "• Ivermectin or Doramectin\n\n• Knapsack Sprayer (for amitraz)\n\n• Skin Scraping Kit (Scalpel/Slide)\n\n• Protective Gloves",
+        "prevention": "• Treat sows 7-14 days before farrowing to protect piglets.\n\n• Treat boars every 3 months.\n\n• Sterilize rubbing posts and walls.",
         "steps": [
             "INJECT: Administer Ivermectin (1mL/33kg BW) subcutaneously.",
             "SPRAY: Apply Amitraz solution to the entire herd (not just the sick pig).",
@@ -44,8 +43,8 @@ medical_data = {
         "severity": "⚠️ HIGH (Especially in Piglets)",
         "cause": "Caused by *Staphylococcus hyicus*. Bacteria enters through skin abrasions caused by fighting (needle teeth), rough concrete, or mange bites.",
         "harm": "Toxins damage the liver and kidneys. Piglets become dehydrated rapidly due to skin fluid loss. Mortality can reach 90% in severe litters.",
-        "materials": "• Antibiotics (Amoxicillin/Lincomycin)\n• Antiseptic Soap (Betadine/Chlorhexidine)\n• Soft Cloths\n• Electrolyte Solution",
-        "prevention": "• Clip 'needle teeth' of piglets within 24 hours of birth.\n• Provide soft bedding (rice hull/sawdust) to prevent knee abrasions.\n• Maintain strict hygiene in farrowing crates.",
+        "materials": "• Antibiotics (Amoxicillin/Lincomycin)\n\n• Antiseptic Soap (Betadine/Chlorhexidine)\n\n• Soft Cloths\n\n• Electrolyte Solution",
+        "prevention": "• Clip 'needle teeth' of piglets within 24 hours of birth.\n\n• Provide soft bedding (rice hull/sawdust) to prevent knee abrasions.\n\n• Maintain strict hygiene in farrowing crates.",
         "steps": [
             "WASH: Gently wash the pig with antiseptic soap/solution daily.",
             "MEDICATE: Inject Amoxicillin or Lincomycin for 3-5 days.",
@@ -57,8 +56,8 @@ medical_data = {
         "severity": "✅ OPTIMAL",
         "cause": "Evidence of good husbandry, proper nutrition, and effective biosecurity measures.",
         "harm": "N/A - The animal appears to be in good physical condition.",
-        "materials": "• Routine Vitamins (B-Complex)\n• Vaccination Schedule Record\n• Standard Cleaning Supplies",
-        "prevention": "• Continue current vaccination program.\n• Maintain regular deworming schedule.\n• Monitor feed intake daily.",
+        "materials": "• Routine Vitamins (B-Complex)\n\n• Vaccination Schedule Record\n\n• Standard Cleaning Supplies",
+        "prevention": "• Continue current vaccination program.\n\n• Maintain regular deworming schedule.\n\n• Monitor feed intake daily.",
         "steps": [
             "MAINTENANCE: Continue providing clean water and balanced feed.",
             "MONITORING: Observe for any changes in appetite or activity.",
@@ -67,30 +66,31 @@ medical_data = {
     }
 }
 
-# --- 3. CREATIVE REPORT GENERATOR ---
+# --- 3. CREATIVE REPORT GENERATOR (Fixed Asterisks) ---
 def generate_smart_report(detected_class, count, confidence):
+    # Replaced '**' with '<b>' HTML tags for clean bolding
     intros = [
-        f"Analysis of the uploaded specimen indicates the presence of **{count} distinct anomaly/anomalies**.",
-        f"The TUKLAS diagnostic system has flagged **{count} region(s) of interest** in this sample.",
-        f"Based on visual dermatological patterns, our AI identified **{count} area(s)** requiring attention.",
-        f"A thorough scan of the tissue sample reveals **{count} point(s) of concern**."
+        f"Analysis of the uploaded specimen indicates the presence of <b>{count} distinct anomaly/anomalies</b>.",
+        f"The TUKLAS diagnostic system has flagged <b>{count} region(s) of interest</b> in this sample.",
+        f"Based on visual dermatological patterns, our AI identified <b>{count} area(s)</b> requiring attention.",
+        f"A thorough scan of the tissue sample reveals <b>{count} point(s) of concern</b>."
     ]
     descriptions = [
-        f"The morphological features are highly consistent with **{detected_class}**.",
-        f"The AI has classified the skin texture and discoloration patterns as **{detected_class}**.",
-        f"Visual indicators suggest a high probability of **{detected_class}**.",
-        f"The detected lesions exhibit characteristics typical of **{detected_class}**."
+        f"The morphological features are highly consistent with <b>{detected_class}</b>.",
+        f"The AI has classified the skin texture and discoloration patterns as <b>{detected_class}</b>.",
+        f"Visual indicators suggest a high probability of <b>{detected_class}</b>.",
+        f"The detected lesions exhibit characteristics typical of <b>{detected_class}</b>."
     ]
     actions = [
-        f"With a confidence score of **{confidence:.1f}%**, immediate veterinary assessment is recommended.",
-        f"The system is **{confidence:.1f}%** certain of this diagnosis. Please refer to the treatment protocols below.",
-        f"Given the high confidence (**{confidence:.1f}%**), isolation protocols should be initiated immediately.",
-        f"The model's certainty is **{confidence:.1f}%**. We advise cross-referencing this with a physical exam."
+        f"With a confidence score of <b>{confidence:.1f}%</b>, immediate veterinary assessment is recommended.",
+        f"The system is <b>{confidence:.1f}%</b> certain of this diagnosis. Please refer to the treatment protocols below.",
+        f"Given the high confidence (<b>{confidence:.1f}%</b>), isolation protocols should be initiated immediately.",
+        f"The model's certainty is <b>{confidence:.1f}%</b>. We advise cross-referencing this with a physical exam."
     ]
     
     # Special override for Healthy
     if "Healthy" in detected_class:
-        return f"Analysis complete. The system detected **{count} region(s)** classified as **Healthy Skin**. With a confidence of **{confidence:.1f}%**, the animal appears to be free of visible dermatological pathologies. Continue routine monitoring."
+        return f"Analysis complete. The system detected <b>{count} region(s)</b> classified as <b>Healthy Skin</b>. With a confidence of <b>{confidence:.1f}%</b>, the animal appears to be free of visible dermatological pathologies. Continue routine monitoring."
 
     text = f"{random.choice(intros)} {random.choice(descriptions)} {random.choice(actions)}"
     return text
@@ -153,6 +153,7 @@ st.markdown("""
         font-weight: bold;
         font-size: 1.1em;
         margin-bottom: 5px;
+        margin-top: 10px;
     }
 
     /* Footer */
@@ -256,15 +257,14 @@ if selected_page == "🔍 Lesion Scanner":
                 st.markdown("---")
                 st.subheader("📋 Automated Veterinary Report")
                 
-                # Logic: If nothing found, assume healthy? 
-                # OR if YOLO detects "Healthy", use that.
                 if count == 0:
-                    st.success("✅ **Negative Result:** No specific lesions detected. The specimen appears healthy based on current sensitivity.")
+                    st.success("✅ **Negative Result:** No skin lesions detected based on current sensitivity settings. The specimen appears healthy.")
                 else:
                     # 1. Generate the "Creative" Paragraph
                     primary_detection = unique_detections[0] 
                     report_text = generate_smart_report(primary_detection, count, confidence)
                     
+                    # Renders HTML directly, so '<b>' tags work now!
                     st.markdown(f'<div class="report-box">{report_text}</div>', unsafe_allow_html=True)
                     st.write("") 
 
@@ -289,26 +289,31 @@ if selected_page == "🔍 Lesion Scanner":
                                 c1, c2 = st.columns(2)
                                 with c1:
                                     st.markdown('<p class="proto-header">🧬 Origin & Transmission</p>', unsafe_allow_html=True)
-                                    st.info(info['cause'])
+                                    st.info(info['cause']) # BLUE BOX
                                 with c2:
                                     st.markdown('<p class="proto-header">💔 Clinical Impact</p>', unsafe_allow_html=True)
-                                    st.warning(info['harm'])
+                                    st.warning(info['harm']) # YELLOW BOX
                                 
                                 # SECTION 3: MATERIALS & PREVENTION (2 Cols)
                                 c3, c4 = st.columns(2)
                                 with c3:
                                     st.markdown('<p class="proto-header">🧰 Required Supplies</p>', unsafe_allow_html=True)
-                                    st.markdown(info['materials'])
+                                    st.info(info['materials']) # BLUE BOX (Matches Origin)
                                 with c4:
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
-                                    st.markdown(info['prevention'])
+                                    st.success(info['prevention']) # GREEN BOX
                                 
                                 st.divider()
                                 
                                 # SECTION 4: ACTION PLAN
                                 st.markdown('<p class="proto-header">💊 Treatment Protocol</p>', unsafe_allow_html=True)
+                                
+                                # Build a single string for the Green Box
+                                protocol_text = ""
                                 for step in info['steps']:
-                                    st.markdown(f"✅ {step}")
+                                    protocol_text += f"✅ {step}\n\n"
+                                
+                                st.success(protocol_text) # GREEN BOX for Treatment
                         else:
                             st.error(f"⚠️ **Database Error:** The class '{det_class}' was detected by the AI, but its medical data is missing. Please update `medical_data` in app.py.")
 
