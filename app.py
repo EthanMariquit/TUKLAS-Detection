@@ -44,4 +44,5 @@ medical_data = {
             "MONITOR: Check temperature twice daily until fever subsides."
         ]
     },
-    "Hyperkeratosis / Crusting (Sarcoptic Mange
+    "Hyperkeratosis / Crusting (Sarcoptic Mange)
+
