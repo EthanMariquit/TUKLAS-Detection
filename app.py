@@ -175,6 +175,7 @@ st.markdown("""
         font-family: 'Source Sans Pro', sans-serif;
         margin-bottom: 10px;
         white-space: pre-wrap;
+        line-height: 1.5; /* Added line-height for better readability */
     }
 
     /* INDIVIDUAL COLORS */
@@ -335,7 +336,7 @@ if selected_page == "🔍 Lesion Scanner":
                     det_class = unique_detections[0] 
                     report = generate_smart_report(det_class, count, confidence)
                     
-                    # --- WRAPPED REPORT WITH FIXED PADDING ---
+                    # --- WRAPPED REPORT WITH FIXED PADDING (50px) ---
                     with st.expander("📋 AI DIAGNOSTIC REPORT", expanded=True):
                         st.markdown(f'<div class="report-box">{report}</div>', unsafe_allow_html=True)
                     
@@ -381,9 +382,10 @@ if selected_page == "🔍 Lesion Scanner":
                                 st.markdown('<p class="proto-header">💊 Treatment Protocol</p>', unsafe_allow_html=True)
                                 
                                 # Build a single string for the Green Box (Treatment)
+                                # FIXED: CHANGED \n\n TO \n TO REMOVE EXTRA SPACES
                                 protocol_text = ""
                                 for step in info['steps']:
-                                    protocol_text += f"✅ {step}\n\n"
+                                    protocol_text += f"✅ {step}\n"
                                 
                                 st_green(protocol_text) 
 
