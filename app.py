@@ -118,7 +118,8 @@ class PDFReport(FPDF):
         self.set_font('Arial', '', 10)
         self.cell(0, 5, 'Rizal National Science High School (RiSci)', 0, 1, 'L')
         self.cell(0, 5, 'J.P. Rizal St., Batingan, Binangonan, Rizal', 0, 1, 'L')
-        self.cell(0, 5, 'Phone: (02) 8652-2197 | Email: lab@tuklas-risci.edu', 0, 1, 'L')
+        # UPDATED EMAIL HERE
+        self.cell(0, 5, 'Phone: (02) 8652-2197 | Email: tuklas-risci@gmail.com', 0, 1, 'L')
         
         # 3. Report Title (Right Aligned)
         self.set_y(15)
@@ -168,17 +169,18 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.cell(35, 8, "Case ID:", 1)
     pdf.cell(60, 8, f"TK-{random.randint(10000,99999)}", 1)
     pdf.cell(35, 8, "Date Reported:", 1)
-    pdf.cell(60, 8, datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), 1, 1)
+    # UPDATED DATE FORMAT (Removed Time)
+    pdf.cell(60, 8, datetime.datetime.now().strftime('%Y-%m-%d'), 1, 1)
     # Row 2
     pdf.cell(35, 8, "Specimen Type:", 1)
     pdf.cell(60, 8, "Digital Skin Image", 1)
     pdf.cell(35, 8, "Methodology:", 1)
-    pdf.cell(60, 8, "AI-Computer Vision (YOLOv8)", 1, 1)
+    # UPDATED METHODOLOGY HERE
+    pdf.cell(60, 8, "AI-Computer Vision (YOLOv11)", 1, 1)
     
     pdf.ln(8)
 
     # --- SECTION 2: SPECIMEN IMAGE ---
-    # Keep image smaller and to the side or centered
     try:
         pdf.set_font("Arial", "B", 10)
         pdf.cell(0, 8, "SPECIMEN ANALYZED", 0, 1, 'L')
