@@ -3,6 +3,7 @@ from PIL import Image
 import os
 import random
 import requests
+import time
 from streamlit_lottie import st_lottie
 
 # --- 1. PAGE CONFIGURATION ---
@@ -13,18 +14,17 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. ANIMATION LOADER ---
+# --- 2. ANIMATION LOADER (With Safety Check) ---
 def load_lottieurl(url):
     try:
-        r = requests.get(url)
+        r = requests.get(url, timeout=3) # 3 second timeout prevents hanging
         if r.status_code != 200:
             return None
         return r.json()
     except:
-        return None
+        return None # If it fails, just return None (no crash)
 
-# Load Assets (Microscope & Scanner)
-# These are public URLs for lightweight animations
+# Load Assets
 lottie_microscope = load_lottieurl("https://lottie.host/0a927e36-6923-424d-8686-2484f4791e84/9z4s3l4Y2C.json") 
 lottie_scanning = load_lottieurl("https://lottie.host/5a0c301c-6685-4841-8407-1e0078174f46/7Q1a54a72d.json") 
 lottie_success = load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_5tkzkblw.json") 
@@ -147,245 +147,4 @@ st.markdown("""
     }
     .stButton>button:hover {
         background-color: #004494;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-
-    /* Report Box */
-    .report-box {
-        background-color: #ffffff;
-        color: #333333; 
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        border-left: 6px solid #0056b3;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        font-size: 16px;
-        line-height: 1.6;
-    }
-    
-    /* CUSTOM PURPLE BOX FOR PREVENTION */
-    .purple-box {
-        background-color: #f3e5f5;
-        color: #333333;
-        padding: 20px;
-        border-radius: 10px;
-        border-left: 6px solid #9c27b0;
-        margin-bottom: 10px;
-        font-size: 14px;
-    }
-    
-    /* Protocol Headers */
-    .proto-header {
-        color: #0056b3;
-        font-weight: bold;
-        font-size: 1.1em;
-        margin-bottom: 5px;
-        margin-top: 10px;
-    }
-
-    /* Footer */
-    .footer {
-        position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        background-color: #2c3e50;
-        color: #ecf0f1;
-        text-align: center;
-        padding: 12px;
-        font-size: 13px;
-        z-index: 100;
-        border-top: 3px solid #0056b3;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-# --- 7. MODEL LOADING ---
-folder = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(folder, "best.pt")
-
-try:
-    from ultralytics import YOLO
-except ImportError:
-    st.error("❌ System Error: Libraries missing.")
-    st.stop()
-
-if not os.path.exists(model_path):
-    st.warning("⚠️ Model not found. Please upload best.pt")
-    model = None
-else:
-    @st.cache_resource
-    def load_model():
-        return YOLO(model_path)
-    model = load_model()
-
-# --- 8. SIDEBAR ---
-with st.sidebar:
-    if lottie_microscope:
-        st_lottie(lottie_microscope, height=150, key="sidebar_anim")
-    else:
-        st.image("https://img.icons8.com/fluency/96/microscope.png", width=80)
-        
-    st.title("TUKLAS Diagnostics")
-    st.caption("Veterinary Skin Lesion Analysis System")
-    st.markdown("---")
-    
-    selected_page = st.selectbox("Navigate", ["🔍 Lesion Scanner", "📞 Local Directory"])
-    st.markdown("---")
-
-    conf_threshold = 0.25 # Default
-    if selected_page == "🔍 Lesion Scanner":
-        st.write("⚙️ **Scanner Settings**")
-        conf_threshold = st.slider("Sensitivity Threshold", 0.0, 1.0, 0.40, 0.05)
-        st.info("ℹ️ **Usage Guide**\n1. Upload a clear image of the skin.\n2. The AI will highlight anomalies.\n3. Review the generated medical report.")
-
-# --- 9. PAGE: LESION SCANNER ---
-if selected_page == "🔍 Lesion Scanner":
-    st.title("🔬 TUKLAS: Smart Veterinary Assistant")
-    st.markdown("### Automated Detection & Diagnostics")
-    st.write("Upload a sample image to generate a comprehensive diagnostic report.")
-
-    uploaded_file = st.file_uploader("Upload Image (JPG/PNG)", type=['jpg', 'png', 'jpeg'])
-
-    if uploaded_file:
-        img = Image.open(uploaded_file)
-        
-        col1, col2 = st.columns([1, 1])
-        
-        with col1:
-            st.subheader("📸 Original Sample")
-            st.image(img, use_column_width=True, caption="Uploaded Specimen")
-
-        if st.button("🔍 Generate Diagnostic Report"):
-            if model is None:
-                st.error("Model file missing.")
-            else:
-                # --- ANIMATION: PROCESSING ---
-                with st.spinner("Initializing AI Models..."):
-                    # Show scanning animation in the second column while loading
-                    with col2:
-                        if lottie_scanning:
-                            st_lottie(lottie_scanning, height=200, key="scanning")
-                    
-                    # Run the AI
-                    results = model.predict(img, conf=conf_threshold)
-                    result_plot = results[0].plot()
-                    
-                    # Extract Data
-                    detected_classes = [model.names[int(box.cls)] for box in results[0].boxes]
-                    unique_detections = list(set(detected_classes))
-                    count = len(detected_classes)
-                    
-                    # Calculate Confidence (Average)
-                    confidence = 0.0
-                    if len(results[0].boxes) > 0:
-                        confs = results[0].boxes.conf.tolist()
-                        confidence = (sum(confs) / len(confs)) * 100
-
-                # Clear the animation and show results
-                with col2:
-                    st.empty() # Clear animation
-                    st.subheader("🛡️ AI Detection Results")
-                    st.image(result_plot, use_column_width=True, caption=f"Identified {count} anomalies")
-                    
-                    if count > 0:
-                        st.metric(label="AI Confidence Score", value=f"{confidence:.1f}%")
-                        st.progress(int(confidence))
-
-                # --- DYNAMIC REPORT SECTION ---
-                st.markdown("---")
-                st.subheader("📋 Automated Veterinary Report")
-                
-                if count == 0:
-                    st.success("✅ **Negative Result:** No skin lesions detected based on current sensitivity settings. The specimen appears healthy.")
-                    if lottie_success:
-                        st_lottie(lottie_success, height=100, key="clean_bill")
-                else:
-                    # 1. Generate the "Creative" Paragraph
-                    primary_detection = unique_detections[0] 
-                    report_text = generate_smart_report(primary_detection, count, confidence)
-                    
-                    st.markdown(f'<div class="report-box">{report_text}</div>', unsafe_allow_html=True)
-                    st.write("") 
-
-                    # 2. Show Medical Advice
-                    for det_class in unique_detections:
-                        # Match logic
-                        info = medical_data.get(det_class)
-                        if not info:
-                            for key in medical_data.keys():
-                                if key in det_class or det_class in key:
-                                    info = medical_data[key]
-                                    break
-                        
-                        if info:
-                            with st.expander(f"📌 PROTOCOL: {det_class}", expanded=True):
-                                # SECTION 1: OVERVIEW
-                                st.markdown(f"**SEVERITY STATUS:** `{info['severity']}`")
-                                st.divider()
-                                
-                                # SECTION 2: THE "WHY" AND "WHAT" (2 Cols)
-                                c1, c2 = st.columns(2)
-                                with c1:
-                                    st.markdown('<p class="proto-header">🧬 Origin & Transmission</p>', unsafe_allow_html=True)
-                                    st.info(info['cause'], icon="🧬") # BLUE BOX
-                                with c2:
-                                    st.markdown('<p class="proto-header">💔 Clinical Impact</p>', unsafe_allow_html=True)
-                                    st.error(info['harm'], icon="💔") # RED BOX (Danger)
-                                
-                                # SECTION 3: MATERIALS & PREVENTION (2 Cols)
-                                c3, c4 = st.columns(2)
-                                with c3:
-                                    st.markdown('<p class="proto-header">🧰 Required Supplies</p>', unsafe_allow_html=True)
-                                    st.warning(info['materials'], icon="🧰") # YELLOW BOX (Caution)
-                                with c4:
-                                    st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
-                                    # CUSTOM PURPLE BOX
-                                    st.markdown(f'<div class="purple-box">{info["prevention"]}</div>', unsafe_allow_html=True)
-                                
-                                st.divider()
-                                
-                                # SECTION 4: ACTION PLAN
-                                st.markdown('<p class="proto-header">💊 Treatment Protocol</p>', unsafe_allow_html=True)
-                                
-                                # Build a single string for the Green Box
-                                protocol_text = ""
-                                for step in info['steps']:
-                                    protocol_text += f"✅ {step}\n\n"
-                                
-                                st.success(protocol_text, icon="💊") # GREEN BOX (Success)
-                        else:
-                            st.error(f"⚠️ **Database Error:** The class '{det_class}' was detected by the AI, but its medical data is missing. Please update `medical_data` in app.py.")
-
-# --- 10. PAGE: DIRECTORY ---
-elif selected_page == "📞 Local Directory":
-    st.title("📞 Agricultural Support Directory")
-    st.markdown("Find your local Municipal Agriculture Office or Veterinary Office below.")
-    
-    search_term = st.text_input("🔍 Search Municipality (e.g., 'Tanay', 'Antipolo')", "")
-    st.markdown("---")
-
-    col1, col2 = st.columns(2)
-    visible_contacts = [c for c in contacts_data if search_term.lower() in c['LGU'].lower() or search_term == ""]
-    
-    if len(visible_contacts) == 0:
-        st.warning("No offices found matching your search.")
-    
-    for i, data in enumerate(visible_contacts):
-        with col1 if i % 2 == 0 else col2:
-            with st.expander(f"📍 **{data['LGU']}**", expanded=True):
-                st.markdown(f"**🏢 Office:** {data['Office']}")
-                st.markdown(f"**👤 Head:** {data['Head']}")
-                st.markdown(f"**📞 Phone:** `{data['Contact']}`")
-                st.markdown(f"**✉️ Email:** {data['Email']}")
-                st.caption("Operating Hours: Mon-Fri, 8AM - 5PM")
-
-# --- 11. FOOTER ---
-st.markdown("""
-<div class="footer">
-    <p><strong>Rizal National Science High School (RiSci)</strong><br>
-    📍 J.P. Rizal St., Batingan, Binangonan, Rizal<br>
-    📞 (02) 8652-2197 | ✉️ rnshs.admin@deped.gov.ph<br>
-    © 2025 Student Research Project | TUKLAS Team</p>
-</div>
-""", unsafe_allow_html=True)
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2
