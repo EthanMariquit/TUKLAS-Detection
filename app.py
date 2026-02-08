@@ -29,7 +29,8 @@ lottie_microscope = load_lottieurl("https://lottie.host/0a927e36-6923-424d-8686-
 lottie_scanning = load_lottieurl("https://lottie.host/5a0c301c-6685-4841-8407-1e0078174f46/7Q1a54a72d.json") 
 
 # --- 3. MEDICAL KNOWLEDGE BASE ---
-# UPDATED: Using proper Markdown syntax (- ) and newlines for clean lists
+# Note: lists use "- " which works in Markdown boxes. 
+# We will convert these newlines for the HTML purple box later.
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
         "severity": "🚨 CRITICAL (High Mortality Risk)",
@@ -153,6 +154,17 @@ st.markdown("""
         border-left: 6px solid #0056b3;
         font-size: 16px;
         line-height: 1.6;
+    }
+    /* EXACT REPLICA OF STREAMLIT ALERT BOX BUT PURPLE */
+    .purple-box {
+        background-color: #f3e5f5; /* Light Purple Background */
+        color: #311b92;           /* Deep Purple Text */
+        padding: 1rem;            /* Identical padding to st.info/st.warning */
+        border-radius: 0.5rem;    /* Identical rounded corners */
+        border: 1px solid #d1c4e9; /* Subtle border */
+        margin-bottom: 1rem;      /* Spacing */
+        line-height: 1.6;
+        font-size: 1rem;
     }
     .proto-header {
         color: #0056b3;
@@ -304,9 +316,11 @@ if selected_page == "🔍 Lesion Scanner":
                                     st.warning(info['materials']) 
                                 with c4:
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
-                                    # REPLACED custom HTML with native Streamlit Success box
-                                    # This ensures it looks exactly parallel to the others
-                                    st.success(info["prevention"])
+                                    
+                                    # FIXED PURPLE BOX:
+                                    # We manually replace newlines with <br> so the HTML renders list items on new lines.
+                                    formatted_prevention = info["prevention"].replace("\n", "<br>")
+                                    st.markdown(f'<div class="purple-box">{formatted_prevention}</div>', unsafe_allow_html=True)
                                 
                                 st.divider()
                                 
