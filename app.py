@@ -27,35 +27,27 @@ def load_lottieurl(url):
 # --- 2.5 CUSTOM PURPLE BOX FUNCTION ---
 def st_purple(text):
     """
-    Creates a custom purple alert box that matches the style of st.success/st.error.
+    Creates a custom purple alert box that adapts to Dark Mode.
+    The CSS class 'purple-box' is defined in Section 6.
     """
-    st.markdown(f"""
-    <div style="
-        background-color: #E6E6FA; 
-        border: 1px solid #D8BFD8;
-        padding: 16px; 
-        border-radius: 0.5rem; 
-        color: #333;
-        font-size: 16px;
-        white-space: pre-wrap; 
-        font-family: 'Source Sans Pro', sans-serif;
-        margin-bottom: 10px;">
-        {text}
-    </div>
-    """, unsafe_allow_html=True)
+    # .strip() fixes the jagged text issue automatically
+    st.markdown(f'<div class="purple-box">{text.strip()}</div>', unsafe_allow_html=True)
 
 # Load Assets
 lottie_microscope = load_lottieurl("https://lottie.host/0a927e36-6923-424d-8686-2484f4791e84/9z4s3l4Y2C.json") 
 lottie_scanning = load_lottieurl("https://lottie.host/5a0c301c-6685-4841-8407-1e0078174f46/7Q1a54a72d.json") 
 
 # --- 3. MEDICAL KNOWLEDGE BASE ---
+# NOTE: strings are aligned left to prevent indentation errors
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
         "severity": "🚨 CRITICAL (High Mortality Risk)",
-        "cause": """Caused by Erysipelothrix rhusiopathiae. Bacteria persists in soil for years. Infection often follows sudden diet changes, stress, or ingestion of contaminated feces.""",
-        "harm": """Rapid onset of high fever (40-42°C), septicemia (blood poisoning), abortion in pregnant sows, and sudden death if untreated within 24 hours.""",
-        "materials": """- Penicillin (Injectable)\n- Sterile Syringes (16G/18G)\n- Digital Thermometer\n- Disinfectant (Phenol-based)\n- Isolation Pen""",
-        "prevention": """- Vaccinate breeding herd twice yearly.\n- Quarantine new animals for 30 days.\n- Ensure proper disposal of infected bedding.""",
+        "cause": "Caused by Erysipelothrix rhusiopathiae. Bacteria persists in soil for years. Infection often follows sudden diet changes, stress, or ingestion of contaminated feces.",
+        "harm": "Rapid onset of high fever (40-42°C), septicemia (blood poisoning), abortion in pregnant sows, and sudden death if untreated within 24 hours.",
+        "materials": "- Penicillin (Injectable)\n- Sterile Syringes (16G/18G)\n- Digital Thermometer\n- Disinfectant (Phenol-based)\n- Isolation Pen",
+        "prevention": """- Vaccinate breeding herd twice yearly.
+- Quarantine new animals for 30 days.
+- Ensure proper disposal of infected bedding.""",
         "steps": [
             "IMMEDIATE: Isolate the affected animal to prevent herd spread.",
             "TREATMENT: Administer Penicillin (1mL/10kg BW) intramuscularly every 12-24 hours.",
@@ -65,10 +57,12 @@ medical_data = {
     },
     "Hyperkeratosis / Crusting (Sarcoptic Mange)": {
         "severity": "⚠️ MODERATE (Chronic / Contagious)",
-        "cause": """Caused by the mite Sarcoptes scabiei var. suis. The mite burrows into the skin to lay eggs. Highly contagious via direct contact or shared rubbing posts.""",
-        "harm": """Intense itching causes weight loss, poor feed conversion efficiency (FCR), and secondary bacterial infections from scratching open wounds.""",
-        "materials": """- Ivermectin or Doramectin\n- Knapsack Sprayer (for amitraz)\n- Skin Scraping Kit (Scalpel/Slide)\n- Protective Gloves""",
-        "prevention": """- Treat sows 7-14 days before farrowing to protect piglets.\n- Treat boars every 3 months.\n- Sterilize rubbing posts and walls.""",
+        "cause": "Caused by the mite Sarcoptes scabiei var. suis. The mite burrows into the skin to lay eggs. Highly contagious via direct contact or shared rubbing posts.",
+        "harm": "Intense itching causes weight loss, poor feed conversion efficiency (FCR), and secondary bacterial infections from scratching open wounds.",
+        "materials": "- Ivermectin or Doramectin\n- Knapsack Sprayer (for amitraz)\n- Skin Scraping Kit (Scalpel/Slide)\n- Protective Gloves",
+        "prevention": """- Treat sows 7-14 days before farrowing.
+- Treat boars every 3 months.
+- Sterilize rubbing posts and walls.""",
         "steps": [
             "INJECT: Administer Ivermectin (1mL/33kg BW) subcutaneously.",
             "SPRAY: Apply Amitraz solution to the entire herd (not just the sick pig).",
@@ -78,10 +72,12 @@ medical_data = {
     },
     "Greasy / Exudative Skin (Greasy Pig Disease)": {
         "severity": "⚠️ HIGH (Especially in Piglets)",
-        "cause": """Caused by Staphylococcus hyicus. Bacteria enters through skin abrasions caused by fighting (needle teeth), rough concrete, or mange bites.""",
-        "harm": """Toxins damage the liver and kidneys. Piglets become dehydrated rapidly due to skin fluid loss. Mortality can reach 90% in severe litters.""",
-        "materials": """- Antibiotics (Amoxicillin/Lincomycin)\n- Antiseptic Soap (Betadine/Chlorhexidine)\n- Soft Cloths\n- Electrolyte Solution""",
-        "prevention": """- Clip 'needle teeth' of piglets within 24 hours of birth.\n- Provide soft bedding (rice hull/sawdust) to prevent knee abrasions.\n- Maintain strict hygiene in farrowing crates.""",
+        "cause": "Caused by Staphylococcus hyicus. Bacteria enters through skin abrasions caused by fighting (needle teeth), rough concrete, or mange bites.",
+        "harm": "Toxins damage the liver and kidneys. Piglets become dehydrated rapidly due to skin fluid loss. Mortality can reach 90% in severe litters.",
+        "materials": "- Antibiotics (Amoxicillin/Lincomycin)\n- Antiseptic Soap (Betadine/Chlorhexidine)\n- Soft Cloths\n- Electrolyte Solution",
+        "prevention": """- Clip 'needle teeth' of piglets within 24 hours.
+- Provide soft bedding (rice hull) to prevent abrasions.
+- Maintain strict hygiene in farrowing crates.""",
         "steps": [
             "WASH: Gently wash the pig with antiseptic soap/solution daily.",
             "MEDICATE: Inject Amoxicillin or Lincomycin for 3-5 days.",
@@ -91,10 +87,12 @@ medical_data = {
     },
     "Healthy": {
         "severity": "✅ OPTIMAL",
-        "cause": """Evidence of good husbandry, proper nutrition, and effective biosecurity measures.""",
+        "cause": "Evidence of good husbandry, proper nutrition, and effective biosecurity measures.",
         "harm": "N/A - The animal appears to be in good physical condition.",
-        "materials": """- Routine Vitamins (B-Complex)\n- Vaccination Schedule Record\n- Standard Cleaning Supplies""",
-        "prevention": """- Continue current vaccination program.\n- Maintain regular deworming schedule.\n- Monitor feed intake daily.""",
+        "materials": "- Routine Vitamins (B-Complex)\n- Vaccination Schedule Record\n- Standard Cleaning Supplies",
+        "prevention": """- Continue current vaccination program.
+- Maintain regular deworming schedule.
+- Monitor feed intake daily.""",
         "steps": [
             "MAINTENANCE: Continue providing clean water and balanced feed.",
             "MONITORING: Observe for any changes in appetite or activity.",
@@ -154,6 +152,8 @@ contacts_data = [
 st.markdown("""
     <style>
     .main { background-color: #f8f9fa; }
+    
+    /* 1. BUTTON STYLING */
     .stButton>button {
         width: 100%;
         background-color: #0056b3;
@@ -163,9 +163,29 @@ st.markdown("""
         height: 3em;
         border: none;
     }
+
+    /* 2. ADD BORDERS TO STANDARD BOXES */
+    div[data-baseweb="notification"] {
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* 3. PURPLE BOX STYLING (Dark Mode Friendly) */
+    .purple-box {
+        background-color: rgba(106, 13, 173, 0.15); 
+        border: 1px solid #6A0DAD;
+        padding: 16px;
+        border-radius: 5px;
+        color: inherit; 
+        font-family: 'Source Sans Pro', sans-serif;
+        margin-bottom: 10px;
+        white-space: pre-wrap; 
+    }
+
+    /* 4. REPORT BOX */
     .report-box {
         background-color: #ffffff;
-        color: #333333; 
+        color: #333;
         padding: 25px;
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -180,7 +200,8 @@ st.markdown("""
         margin-bottom: 5px;
         margin-top: 10px;
     }
-    /* Footer Style */
+    
+    /* 5. FOOTER */
     .footer {
         position: fixed;
         left: 0;
