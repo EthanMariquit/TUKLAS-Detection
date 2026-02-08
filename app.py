@@ -10,7 +10,7 @@ import datetime
 
 # --- 1. PAGE CONFIGURATION ---
 st.set_page_config(
-    page_title="TUKLAS",
+    page_title="TUKLAS Professional",
     page_icon="🔬",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -175,8 +175,8 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.set_auto_page_break(auto=True, margin=25)
     pdf.add_page()
     
-    # --- MOVED DOWN HERE ---
-    pdf.ln(10) # <--- ADDED EXTRA SPACING SO IT DOESNT TOUCH HEADER
+    # --- SPACING FIX: Move down from header ---
+    pdf.ln(10) 
     
     # --- SECTION 1: PATIENT / CASE INFORMATION (Grid Layout) ---
     pdf.set_font("Arial", "B", 10)
@@ -262,8 +262,13 @@ def create_pdf(img_path, diagnosis, confidence, info):
         pdf.multi_cell(0, 6, clean_step)
         pdf.ln(1)
 
-    # --- SIGNATURE BLOCK ---
-    pdf.set_y(-50)
+    # --- SIGNATURE BLOCK (Updated: Unpinned from bottom) ---
+    pdf.ln(15) # Add space after the last item instead of fixing to bottom
+    
+    # Check if we are too close to the bottom, if so, add page
+    if pdf.get_y() > 230:
+        pdf.add_page()
+    
     pdf.set_font("Arial", "B", 10)
     pdf.cell(95, 5, "Authorized by:", 0, 0, 'C')
     pdf.cell(95, 5, "Verified by (Veterinarian):", 0, 1, 'C')
@@ -589,4 +594,3 @@ st.markdown("""
     © 2025 Student Research Project | TUKLAS Team</p>
 </div>
 """, unsafe_allow_html=True)
-
