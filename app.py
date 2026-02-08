@@ -29,6 +29,7 @@ lottie_microscope = load_lottieurl("https://lottie.host/0a927e36-6923-424d-8686-
 lottie_scanning = load_lottieurl("https://lottie.host/5a0c301c-6685-4841-8407-1e0078174f46/7Q1a54a72d.json") 
 
 # --- 3. MEDICAL KNOWLEDGE BASE ---
+# UPDATED: Using proper Markdown syntax (- ) and newlines for clean lists
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
         "severity": "🚨 CRITICAL (High Mortality Risk)",
@@ -160,7 +161,6 @@ st.markdown("""
         margin-bottom: 5px;
         margin-top: 10px;
     }
-    
     /* Footer Style */
     .footer {
         position: fixed;
@@ -304,34 +304,9 @@ if selected_page == "🔍 Lesion Scanner":
                                     st.warning(info['materials']) 
                                 with c4:
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
-                                    
-                                    # --- THE FIX: MANUAL PURPLE BOX ---
-                                    # We construct the list items manually to match the exact spacing of st.warning
-                                    raw_text = info["prevention"]
-                                    list_items = [line.strip().replace('- ', '').replace('• ', '') for line in raw_text.split('\n') if line.strip()]
-                                    
-                                    # Create HTML List with corrected padding to match Streamlit's native look
-                                    html_list = ""
-                                    for item in list_items:
-                                        html_list += f"<li style='margin-bottom: 0.2rem;'>{item}</li>"
-
-                                    # The Box Container
-                                    st.markdown(f"""
-                                        <div style="
-                                            background-color: #f3e5f5;
-                                            border: 1px solid #d1c4e9;
-                                            padding: 1rem;
-                                            padding-left: 1.2rem;
-                                            border-radius: 0.5rem;
-                                            color: #311b92;
-                                            font-size: 1rem;
-                                            margin-bottom: 1rem;
-                                        ">
-                                            <ul style="margin: 0; padding-left: 1rem;">
-                                                {html_list}
-                                            </ul>
-                                        </div>
-                                    """, unsafe_allow_html=True)
+                                    # REPLACED custom HTML with native Streamlit Success box
+                                    # This ensures it looks exactly parallel to the others
+                                    st.success(info["prevention"])
                                 
                                 st.divider()
                                 
