@@ -24,6 +24,21 @@ def load_lottieurl(url):
     except:
         return None
 
+# --- 2.5 CUSTOM PURPLE BOX FUNCTION ---
+def st_purple(text):
+    """Creates a custom purple alert box similar to st.success/st.error"""
+    st.markdown(f"""
+    <div style="
+        background-color: #E6E6FA; 
+        border-left: 6px solid #6A0DAD; 
+        padding: 16px; 
+        border-radius: 5px; 
+        color: #333;
+        margin-bottom: 10px;">
+        {text}
+    </div>
+    """, unsafe_allow_html=True)
+
 # Load Assets
 lottie_microscope = load_lottieurl("https://lottie.host/0a927e36-6923-424d-8686-2484f4791e84/9z4s3l4Y2C.json") 
 lottie_scanning = load_lottieurl("https://lottie.host/5a0c301c-6685-4841-8407-1e0078174f46/7Q1a54a72d.json") 
@@ -304,11 +319,8 @@ if selected_page == "🔍 Lesion Scanner":
                                 with c4:
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
                                     
-                                    # --- CHANGE APPLIED HERE (Green to Purple) ---
-                                    st.markdown(
-                                        f'<div style="background-color: #E6E6FA; padding: 15px; border-radius: 5px; color: #333;">{info["prevention"]}</div>', 
-                                        unsafe_allow_html=True
-                                    )
+                                    # --- CHANGE APPLIED HERE (Uses the new function) ---
+                                    st_purple(info["prevention"])
                                 
                                 st.divider()
                                 
