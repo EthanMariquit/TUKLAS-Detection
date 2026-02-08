@@ -176,7 +176,7 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.add_page()
     
     # --- SPACING FIX: Move down from header ---
-    pdf.ln(10) 
+    pdf.ln(2)  # <--- REDUCED FROM 10 TO 2
     
     # --- SECTION 1: PATIENT / CASE INFORMATION (Grid Layout) ---
     pdf.set_font("Arial", "B", 10)
@@ -197,18 +197,18 @@ def create_pdf(img_path, diagnosis, confidence, info):
     # UPDATED METHODOLOGY HERE
     pdf.cell(60, 8, "AI-Computer Vision (YOLOv11)", 1, 1)
     
-    pdf.ln(8)
+    pdf.ln(2) # <--- REDUCED FROM 8 TO 2
 
     # --- SECTION 2: SPECIMEN IMAGE (SHRUNK) ---
     try:
         pdf.set_font("Arial", "B", 10)
         pdf.cell(0, 8, "SPECIMEN ANALYZED", 0, 1, 'L')
-        # Draw box around image area (Shrunk height from 60 to 50)
+        # Draw box around image area (Shrunk height)
         y_before_img = pdf.get_y()
         pdf.rect(10, y_before_img, 190, 50)
-        # Image centered inside (Shrunk height from 56 to 45)
+        # Image centered inside (Shrunk height)
         pdf.image(img_path, x=80, y=y_before_img+2, h=45)
-        # Reduced spacing (from 62 to 52)
+        # Reduced spacing
         pdf.ln(52)
     except:
         pdf.cell(0, 10, "[Image Error]", 1, 1)
