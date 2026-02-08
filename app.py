@@ -29,14 +29,14 @@ lottie_microscope = load_lottieurl("https://lottie.host/0a927e36-6923-424d-8686-
 lottie_scanning = load_lottieurl("https://lottie.host/5a0c301c-6685-4841-8407-1e0078174f46/7Q1a54a72d.json") 
 
 # --- 3. MEDICAL KNOWLEDGE BASE ---
-# Triple quotes used for safety against syntax errors
+# UPDATED: Using \n for newlines so they work in Streamlit widgets
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
         "severity": "🚨 CRITICAL (High Mortality Risk)",
         "cause": """Caused by Erysipelothrix rhusiopathiae. Bacteria persists in soil for years. Infection often follows sudden diet changes, stress, or ingestion of contaminated feces.""",
         "harm": """Rapid onset of high fever (40-42°C), septicemia (blood poisoning), abortion in pregnant sows, and sudden death if untreated within 24 hours.""",
-        "materials": """• Penicillin (Injectable)<br>• Sterile Syringes (16G/18G)<br>• Digital Thermometer<br>• Disinfectant (Phenol-based)<br>• Isolation Pen""",
-        "prevention": """• Vaccinate breeding herd twice yearly.<br>• Quarantine new animals for 30 days.<br>• Ensure proper disposal of infected bedding.""",
+        "materials": """• Penicillin (Injectable)\n• Sterile Syringes (16G/18G)\n• Digital Thermometer\n• Disinfectant (Phenol-based)\n• Isolation Pen""",
+        "prevention": """• Vaccinate breeding herd twice yearly.\n• Quarantine new animals for 30 days.\n• Ensure proper disposal of infected bedding.""",
         "steps": [
             "IMMEDIATE: Isolate the affected animal to prevent herd spread.",
             "TREATMENT: Administer Penicillin (1mL/10kg BW) intramuscularly every 12-24 hours.",
@@ -48,8 +48,8 @@ medical_data = {
         "severity": "⚠️ MODERATE (Chronic / Contagious)",
         "cause": """Caused by the mite Sarcoptes scabiei var. suis. The mite burrows into the skin to lay eggs. Highly contagious via direct contact or shared rubbing posts.""",
         "harm": """Intense itching causes weight loss, poor feed conversion efficiency (FCR), and secondary bacterial infections from scratching open wounds.""",
-        "materials": """• Ivermectin or Doramectin<br>• Knapsack Sprayer (for amitraz)<br>• Skin Scraping Kit (Scalpel/Slide)<br>• Protective Gloves""",
-        "prevention": """• Treat sows 7-14 days before farrowing to protect piglets.<br>• Treat boars every 3 months.<br>• Sterilize rubbing posts and walls.""",
+        "materials": """• Ivermectin or Doramectin\n• Knapsack Sprayer (for amitraz)\n• Skin Scraping Kit (Scalpel/Slide)\n• Protective Gloves""",
+        "prevention": """• Treat sows 7-14 days before farrowing to protect piglets.\n• Treat boars every 3 months.\n• Sterilize rubbing posts and walls.""",
         "steps": [
             "INJECT: Administer Ivermectin (1mL/33kg BW) subcutaneously.",
             "SPRAY: Apply Amitraz solution to the entire herd (not just the sick pig).",
@@ -61,8 +61,8 @@ medical_data = {
         "severity": "⚠️ HIGH (Especially in Piglets)",
         "cause": """Caused by Staphylococcus hyicus. Bacteria enters through skin abrasions caused by fighting (needle teeth), rough concrete, or mange bites.""",
         "harm": """Toxins damage the liver and kidneys. Piglets become dehydrated rapidly due to skin fluid loss. Mortality can reach 90% in severe litters.""",
-        "materials": """• Antibiotics (Amoxicillin/Lincomycin)<br>• Antiseptic Soap (Betadine/Chlorhexidine)<br>• Soft Cloths<br>• Electrolyte Solution""",
-        "prevention": """• Clip 'needle teeth' of piglets within 24 hours of birth.<br>• Provide soft bedding (rice hull/sawdust) to prevent knee abrasions.<br>• Maintain strict hygiene in farrowing crates.""",
+        "materials": """• Antibiotics (Amoxicillin/Lincomycin)\n• Antiseptic Soap (Betadine/Chlorhexidine)\n• Soft Cloths\n• Electrolyte Solution""",
+        "prevention": """• Clip 'needle teeth' of piglets within 24 hours of birth.\n• Provide soft bedding (rice hull/sawdust) to prevent knee abrasions.\n• Maintain strict hygiene in farrowing crates.""",
         "steps": [
             "WASH: Gently wash the pig with antiseptic soap/solution daily.",
             "MEDICATE: Inject Amoxicillin or Lincomycin for 3-5 days.",
@@ -74,8 +74,8 @@ medical_data = {
         "severity": "✅ OPTIMAL",
         "cause": """Evidence of good husbandry, proper nutrition, and effective biosecurity measures.""",
         "harm": "N/A - The animal appears to be in good physical condition.",
-        "materials": """• Routine Vitamins (B-Complex)<br>• Vaccination Schedule Record<br>• Standard Cleaning Supplies""",
-        "prevention": """• Continue current vaccination program.<br>• Maintain regular deworming schedule.<br>• Monitor feed intake daily.""",
+        "materials": """• Routine Vitamins (B-Complex)\n• Vaccination Schedule Record\n• Standard Cleaning Supplies""",
+        "prevention": """• Continue current vaccination program.\n• Maintain regular deworming schedule.\n• Monitor feed intake daily.""",
         "steps": [
             "MAINTENANCE: Continue providing clean water and balanced feed.",
             "MONITORING: Observe for any changes in appetite or activity.",
@@ -302,23 +302,24 @@ if selected_page == "🔍 Lesion Scanner":
                                 c1, c2 = st.columns(2)
                                 with c1:
                                     st.markdown('<p class="proto-header">🧬 Origin & Transmission</p>', unsafe_allow_html=True)
-                                    # Removed explicit icon argument
                                     st.info(info['cause']) 
                                 with c2:
                                     st.markdown('<p class="proto-header">💔 Clinical Impact</p>', unsafe_allow_html=True)
-                                    # Removed explicit icon argument
                                     st.error(info['harm']) 
                                 
                                 # SECTION 3: MATERIALS & PREVENTION (2 Cols)
                                 c3, c4 = st.columns(2)
                                 with c3:
                                     st.markdown('<p class="proto-header">🧰 Required Supplies</p>', unsafe_allow_html=True)
-                                    # Removed explicit icon argument
+                                    # Yellow box works with \n newlines
                                     st.warning(info['materials']) 
                                 with c4:
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
-                                    # Custom Purple Box
-                                    st.markdown(f'<div class="purple-box">{info["prevention"]}</div>', unsafe_allow_html=True)
+                                    
+                                    # FIXED PURPLE BOX:
+                                    # Convert the Python newlines (\n) to HTML breaks (<br>) for the HTML div
+                                    formatted_prevention = info["prevention"].replace("\n", "<br>")
+                                    st.markdown(f'<div class="purple-box">{formatted_prevention}</div>', unsafe_allow_html=True)
                                 
                                 st.divider()
                                 
@@ -330,7 +331,6 @@ if selected_page == "🔍 Lesion Scanner":
                                 for step in info['steps']:
                                     protocol_text += f"✅ {step}\n\n"
                                 
-                                # Removed explicit icon argument
                                 st.success(protocol_text) 
 
 # --- 10. PAGE: DIRECTORY ---
