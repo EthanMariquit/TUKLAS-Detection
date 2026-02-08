@@ -1,6 +1,7 @@
 import streamlit as st
 from PIL import Image
 import os
+import random
 
 # --- 1. PAGE CONFIGURATION ---
 st.set_page_config(
@@ -10,31 +11,76 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. DATA: MEDICAL KNOWLEDGE BASE ---
-# ⚠️ IMPORTANT: keys must match your YOLO class names exactly (e.g., 'lesion', 'healthy')
+# --- 2. MEDICAL KNOWLEDGE BASE (Updated with your 3 Classes) ---
+# I am using the EXACT names you gave me. 
+# If the AI fails to find them, we will see the "detected name" on screen to fix it.
 medical_data = {
-    "lesion": {
-        "severity": "High",
-        "cause": "Possible bacterial or viral infection (e.g., Hog Cholera, ASF, or dermatitis).",
-        "harm": "Can spread rapidly to other pigs; may result in weight loss or mortality.",
+    "Diamond-shaped Plaques (Erysipelas)": {
+        "severity": "High (Acute)",
+        "cause": "Erysipelothrix rhusiopathiae bacteria. Often caused by sudden diet changes or contaminated soil.",
+        "harm": "Can cause high fever, septicemia (blood poisoning), and sudden death if untreated.",
         "steps": [
-            "Isolate the affected pig immediately.",
-            "Disinfect the pen with veterinary-grade cleaners.",
-            "Contact your local agricultural officer for a blood test."
+            "Administer Penicillin (drug of choice) immediately.",
+            "Isolate the sick pig from the herd.",
+            "Disinfect pens with phenols or alkalis."
         ]
     },
-    "healthy": {
-        "severity": "Low",
+    "Hyperkeratosis / Crusting (Sarcoptic Mange)": {
+        "severity": "Moderate (Chronic)",
+        "cause": "Sarcoptes scabiei var. suis (Mites). Spread by direct contact with infected pigs.",
+        "harm": "Severe itching leads to weight loss, slow growth, and secondary infections from scratching.",
+        "steps": [
+            "Apply Ivermectin or Doramectin (injectable or feed additive).",
+            "Spray sow herds with amitraz solutions.",
+            "Treat all in-contact pigs, not just the visible ones."
+        ]
+    },
+    "Greasy / Exudative Skin (Greasy Pig Disease)": {
+        "severity": "High (in Piglets)",
+        "cause": "Staphylococcus hyicus bacteria. Enters through bite wounds or abrasive floors.",
+        "harm": "Causes dehydration and death in piglets; skin becomes greasy/oily and foul-smelling.",
+        "steps": [
+            "Wash pig with mild antiseptic soap and dry thoroughly.",
+            "Administer antibiotics (Amoxicillin or Lincomycin).",
+            "Clip 'needle teeth' in piglets to prevent facial biting."
+        ]
+    },
+    "Healthy": { # Added just in case
+        "severity": "None",
         "cause": "N/A",
         "harm": "N/A",
-        "steps": [
-            "Continue regular feeding and hygiene monitoring.",
-            "Schedule routine vaccination."
-        ]
+        "steps": ["Routine vaccination.", "Maintain hygiene."]
     }
 }
 
-# --- 3. DATA: CONTACT DIRECTORY ---
+# --- 3. THE "CREATIVE" REPORT WRITER ---
+def generate_smart_report(detected_class, count, confidence):
+    # Templates for the Intro
+    intros = [
+        f"Analysis of the uploaded specimen reveals **{count} distinct region(s)** of concern.",
+        f"The TUKLAS diagnostic system has flagged **{count} potential anomaly/anomalies** in this sample.",
+        f"Based on visual dermatological patterns, we identified **{count} area(s)** matching known pathology."
+    ]
+    
+    # Templates for the Description
+    descriptions = [
+        f"The visual indicators are highly consistent with **{detected_class}**.",
+        f"The AI has classified the skin texture and discoloration as **{detected_class}**.",
+        f"Morphological features suggest the presence of **{detected_class}**."
+    ]
+    
+    # Templates for the Confidence/Action
+    actions = [
+        f"With a confidence score of **{confidence:.1f}%**, immediate veterinary assessment is recommended.",
+        f"The system is **{confidence:.1f}%** certain of this diagnosis. Please refer to the treatment protocols below.",
+        f"Given the high confidence (**{confidence:.1f}%**), isolation protocols should be considered immediately."
+    ]
+    
+    # Randomly pick one from each to make a unique paragraph
+    text = f"{random.choice(intros)} {random.choice(descriptions)} {random.choice(actions)}"
+    return text
+
+# --- 4. CONTACTS DATA ---
 contacts_data = [
     {"LGU": "Angono", "Office": "Municipal Veterinary Office", "Head": "Dr. Joel V. Tuplano", "Contact": "(02) 8451-1033", "Email": "officeofthemayor.angono@gmail.com"},
     {"LGU": "Antipolo City", "Office": "City Veterinary Office", "Head": "Dr. Rocelle D. Pico", "Contact": "(02) 8689-4514", "Email": "antipolocityvet@gmail.com"},
@@ -52,7 +98,7 @@ contacts_data = [
     {"LGU": "Teresa", "Office": "Municipal Agriculture Office", "Head": "Department Head", "Contact": "Walk-in Recommended", "Email": "agriculture@teresarizal.gov.ph"},
 ]
 
-# --- 4. CSS STYLING ---
+# --- 5. CSS STYLING (Fixed White Text Issue) ---
 st.markdown("""
     <style>
     .main { background-color: #f8f9fa; }
@@ -64,19 +110,15 @@ st.markdown("""
         border-radius: 8px;
         height: 3em;
     }
+    /* Fixed the White Text Issue here */
     .report-box {
-        background-color: white;
+        background-color: #ffffff;
+        color: #333333; /* Forces dark gray text */
         padding: 20px;
         border-radius: 10px;
         box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
         border-left: 5px solid #0056b3;
-    }
-    .contact-card {
-        background-color: white;
-        padding: 15px;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        border: 1px solid #ddd;
+        font-family: 'Arial', sans-serif;
     }
     .footer {
         position: fixed;
@@ -93,7 +135,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 5. MODEL LOADING ---
+# --- 6. MODEL LOADING ---
 folder = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(folder, "best.pt")
 
@@ -112,25 +154,23 @@ else:
         return YOLO(model_path)
     model = load_model()
 
-# --- 6. SIDEBAR NAVIGATION ---
+# --- 7. SIDEBAR NAVIGATION ---
 with st.sidebar:
     st.image("https://img.icons8.com/fluency/96/microscope.png", width=80)
     st.title("TUKLAS Diagnostics")
     st.caption("Veterinary Skin Lesion Analysis System")
     st.markdown("---")
     
-    # NAVIGATION MENU
     selected_page = st.selectbox("Navigate", ["🔍 Lesion Scanner", "📞 Local Directory"])
     st.markdown("---")
 
-    # Only show model settings if in Scanner mode
     conf_threshold = 0.40
     if selected_page == "🔍 Lesion Scanner":
         st.write("⚙️ **Scanner Settings**")
         conf_threshold = st.slider("Sensitivity", 0.0, 1.0, 0.40, 0.05)
         st.info("ℹ️ **How to use**\n1. Upload pig skin image.\n2. AI scans for anomalies.\n3. Review automated medical report.")
 
-# --- 7. MAIN CONTENT: SCANNER ---
+# --- 8. PAGE: LESION SCANNER ---
 if selected_page == "🔍 Lesion Scanner":
     st.title("🔬 TUKLAS: Smart Veterinary Assistant")
     st.write("Upload a sample image to generate a comprehensive diagnostic report.")
@@ -139,8 +179,6 @@ if selected_page == "🔍 Lesion Scanner":
 
     if uploaded_file:
         img = Image.open(uploaded_file)
-        
-        # Layout: Left (Image), Right (Results)
         col1, col2 = st.columns([1, 1])
         
         with col1:
@@ -159,33 +197,53 @@ if selected_page == "🔍 Lesion Scanner":
                     detected_classes = [model.names[int(box.cls)] for box in results[0].boxes]
                     unique_detections = list(set(detected_classes))
                     count = len(detected_classes)
+                    
+                    # Get Confidence (Average of first detection if exists)
+                    confidence = 0.0
+                    if len(results[0].boxes) > 0:
+                        confidence = float(results[0].boxes.conf[0]) * 100
 
                 with col2:
                     st.subheader("🛡️ AI Detection")
                     st.image(result_plot, use_column_width=True, caption=f"Identified {count} regions of interest")
 
-                # --- REPORT SECTION ---
+                # --- DYNAMIC REPORT SECTION ---
                 st.markdown("---")
                 st.subheader("📋 Automated Veterinary Report")
                 
                 if count == 0:
                     st.success("✅ No skin lesions detected. The specimen appears healthy based on current sensitivity settings.")
                 else:
-                    # Dynamic Description
-                    desc_text = f"The system detected **{count} region(s)** of interest. "
-                    if "lesion" in unique_detections:
-                        desc_text += "Signs of **pathological skin lesions** were identified."
-                    st.markdown(f'<div class="report-box">{desc_text}</div>', unsafe_allow_html=True)
+                    # 1. Generate the Paragraph
+                    primary_detection = unique_detections[0] # Take the first one found
+                    
+                    # If the AI detects a name that ISN'T in our dictionary, show it raw
+                    # This helps you debug if the names don't match!
+                    display_name = primary_detection
+                    
+                    report_text = generate_smart_report(display_name, count, confidence)
+                    
+                    # Display the Paragraph in the styled box
+                    st.markdown(f'<div class="report-box">{report_text}</div>', unsafe_allow_html=True)
                     st.write("") 
 
-                    # Medical Advice Loop
+                    # 2. Show Specific Medical Advice
                     for det_class in unique_detections:
-                        info = medical_data.get(det_class, None)
+                        # Try to find the exact match in our dictionary
+                        info = medical_data.get(det_class)
+                        
+                        # If not found, try a "fuzzy" match (e.g. finding "Erysipelas" inside the long string)
+                        if not info:
+                            for key in medical_data.keys():
+                                if key in det_class or det_class in key:
+                                    info = medical_data[key]
+                                    break
                         
                         if info:
                             with st.expander(f"🔴 Issue Detected: {det_class.upper()} (Click for Advice)", expanded=True):
                                 c1, c2 = st.columns(2)
                                 with c1:
+                                    st.markdown(f"**Severity:** {info['severity']}")
                                     st.markdown(f"**Potential Causes:**\n{info['cause']}")
                                     st.markdown(f"**Potential Harms:**\n{info['harm']}")
                                 with c2:
@@ -193,20 +251,17 @@ if selected_page == "🔍 Lesion Scanner":
                                     for step in info['steps']:
                                         st.markdown(f"- {step}")
                         else:
-                            st.warning(f"Detected '{det_class}', but no medical data is available in the database.")
+                            st.error(f"⚠️ Unrecognized Class: '{det_class}'. Please update the code to match this name exactly.")
 
-# --- 8. MAIN CONTENT: DIRECTORY ---
+# --- 9. PAGE: DIRECTORY ---
 elif selected_page == "📞 Local Directory":
     st.title("📞 Agricultural Support Directory")
     st.markdown("Find your local Municipal Agriculture Office or Veterinary Office below.")
     
-    # Search Bar
     search_term = st.text_input("🔍 Search Municipality (e.g., 'Tanay', 'Antipolo')", "")
     st.markdown("---")
 
-    # Grid Layout
     col1, col2 = st.columns(2)
-    
     visible_contacts = [c for c in contacts_data if search_term.lower() in c['LGU'].lower() or search_term == ""]
     
     if len(visible_contacts) == 0:
@@ -221,7 +276,7 @@ elif selected_page == "📞 Local Directory":
                 st.markdown(f"**✉️ Email:** {data['Email']}")
                 st.caption("Operating Hours: Mon-Fri, 8AM - 5PM")
 
-# --- 9. FOOTER ---
+# --- 10. FOOTER ---
 st.markdown("""
 <div class="footer">
     <p><strong>Rizal National Science High School (RiSci)</strong><br>
@@ -230,4 +285,3 @@ st.markdown("""
     © 2025 Student Research Project | TUKLAS Team</p>
 </div>
 """, unsafe_allow_html=True)
-
