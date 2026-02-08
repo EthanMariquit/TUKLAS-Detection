@@ -5,6 +5,8 @@ import random
 import requests
 import time
 from streamlit_lottie import st_lottie
+from fpdf import FPDF  # <--- NEW LIBRARY FOR PDF
+import datetime
 
 # --- 1. PAGE CONFIGURATION ---
 st.set_page_config(
@@ -101,7 +103,95 @@ medical_data = {
     }
 }
 
-# --- 4. CREATIVE REPORT GENERATOR ---
+# --- 4. PDF GENERATOR ENGINE ---
+class PDFReport(FPDF):
+    def header(self):
+        # Header Color
+        self.set_fill_color(0, 86, 179) # Blue
+        self.rect(0, 0, 210, 40, 'F')
+        
+        # Title
+        self.set_font('Arial', 'B', 24)
+        self.set_text_color(255, 255, 255)
+        self.cell(0, 20, 'TUKLAS DIAGNOSTICS', 0, 1, 'C')
+        
+        # Subtitle
+        self.set_font('Arial', 'I', 12)
+        self.cell(0, 10, 'Veterinary Skin Lesion Analysis System | RiSci Research', 0, 1, 'C')
+        self.ln(10)
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        self.set_text_color(128)
+        self.cell(0, 10, 'Disclaimer: This is an AI-generated report. Consult a licensed veterinarian for final diagnosis.', 0, 0, 'C')
+
+def create_pdf(img_path, diagnosis, confidence, info):
+    pdf = PDFReport()
+    pdf.add_page()
+    
+    # 1. CASE DETAILS
+    pdf.set_text_color(0)
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 10, f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", 0, 1, 'R')
+    pdf.cell(0, 10, f"Case ID: #TK-{random.randint(1000,9999)}", 0, 1, 'R')
+    pdf.ln(5)
+    
+    # 2. IMAGE
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, "SPECIMEN ANALYSIS", 0, 1, 'L')
+    try:
+        # Centering Image
+        img_width = 100
+        x_pos = (210 - img_width) / 2
+        pdf.image(img_path, x=x_pos, w=img_width)
+        pdf.ln(5)
+    except:
+        pdf.cell(0, 10, "[Image Error]", 0, 1)
+
+    # 3. DIAGNOSIS BOX
+    pdf.set_fill_color(240, 240, 240)
+    pdf.rect(10, pdf.get_y(), 190, 35, 'F')
+    pdf.ln(5)
+    
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(20)
+    pdf.cell(50, 10, "DETECTED:", 0, 0)
+    pdf.set_text_color(200, 0, 0) # Red
+    pdf.cell(0, 10, diagnosis.upper(), 0, 1)
+    
+    pdf.set_text_color(0)
+    pdf.cell(20)
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(50, 10, "CONFIDENCE:", 0, 0)
+    pdf.cell(0, 10, f"{confidence:.1f}%", 0, 1)
+    
+    pdf.cell(20)
+    pdf.cell(50, 10, "SEVERITY:", 0, 0)
+    # Handle severity text to fit
+    sev_text = info['severity'][:60] + "..." if len(info['severity']) > 60 else info['severity']
+    pdf.cell(0, 10, sev_text, 0, 1)
+    pdf.ln(10)
+    
+    # 4. TREATMENT PROTOCOL
+    pdf.set_font("Arial", "B", 14)
+    pdf.set_text_color(0, 86, 179)
+    pdf.cell(0, 10, "RECOMMENDED TREATMENT PROTOCOL", 0, 1, 'L')
+    pdf.line(10, pdf.get_y(), 200, pdf.get_y()) # Line
+    pdf.ln(5)
+    
+    pdf.set_font("Arial", "", 11)
+    pdf.set_text_color(0)
+    
+    for step in info['steps']:
+        # Clean text for PDF (remove emojis sometimes causes issues in basic FPDF)
+        clean_step = step.encode('latin-1', 'replace').decode('latin-1') 
+        pdf.multi_cell(0, 8, f"- {clean_step}")
+        pdf.ln(1)
+        
+    return pdf.output(dest='S').encode('latin-1')
+
+# --- 5. REPORT GENERATOR HELPER ---
 def generate_smart_report(detected_class, count, confidence):
     intros = [
         f"Analysis of the uploaded specimen indicates the presence of <b>{count} distinct anomaly/anomalies</b>.",
@@ -130,7 +220,7 @@ def generate_smart_report(detected_class, count, confidence):
     text = f"{random.choice(intros)} {random.choice(descriptions)} {random.choice(actions)}"
     return text
 
-# --- 5. CONTACTS DATA ---
+# --- 6. CONTACTS DATA ---
 contacts_data = [
     {"LGU": "Angono", "Office": "Municipal Veterinary Office", "Head": "Dr. Joel V. Tuplano", "Contact": "(02) 8451-1033", "Email": "officeofthemayor.angono@gmail.com"},
     {"LGU": "Antipolo City", "Office": "City Veterinary Office", "Head": "Dr. Rocelle D. Pico", "Contact": "(02) 8689-4514", "Email": "antipolocityvet@gmail.com"},
@@ -148,7 +238,7 @@ contacts_data = [
     {"LGU": "Teresa", "Office": "Municipal Agriculture Office", "Head": "Department Head", "Contact": "Walk-in Recommended", "Email": "agriculture@teresarizal.gov.ph"},
 ]
 
-# --- 6. CSS STYLING (THEMED) ---
+# --- 7. CSS STYLING (THEMED) ---
 st.markdown("""
     <style>
     /* REMOVE HARDCODED MAIN BACKGROUND SO STREAMLIT THEME WORKS */
@@ -167,52 +257,30 @@ st.markdown("""
     }
 
     /* --- CUSTOM BOX STYLES --- */
-    /* SHARED PROPERTIES */
     .purple-box, .blue-box, .red-box, .yellow-box, .green-box {
         padding: 16px;
         border-radius: 5px;
-        color: inherit; /* Adapts to Dark/Light mode text color */
+        color: inherit; 
         font-family: 'Source Sans Pro', sans-serif;
         margin-bottom: 10px;
         white-space: pre-wrap;
-        line-height: 1.5; /* Added line-height for better readability */
+        line-height: 1.5; 
     }
+    .purple-box { background-color: rgba(106, 13, 173, 0.1); border: 1px solid #6A0DAD; }
+    .blue-box { background-color: rgba(0, 86, 179, 0.1); border: 1px solid #0056b3; }
+    .red-box { background-color: rgba(255, 75, 75, 0.1); border: 1px solid #FF4B4B; }
+    .yellow-box { background-color: rgba(255, 170, 0, 0.1); border: 1px solid #FFAA00; }
+    .green-box { background-color: rgba(0, 200, 83, 0.1); border: 1px solid #00C853; }
 
-    /* INDIVIDUAL COLORS */
-    .purple-box {
-        background-color: rgba(106, 13, 173, 0.1); 
-        border: 1px solid #6A0DAD;
-    }
-    .blue-box {
-        background-color: rgba(0, 86, 179, 0.1); 
-        border: 1px solid #0056b3;
-    }
-    .red-box {
-        background-color: rgba(255, 75, 75, 0.1); 
-        border: 1px solid #FF4B4B;
-    }
-    .yellow-box {
-        background-color: rgba(255, 170, 0, 0.1); 
-        border: 1px solid #FFAA00;
-    }
-    .green-box {
-        background-color: rgba(0, 200, 83, 0.1); 
-        border: 1px solid #00C853;
-    }
-
-    /* REPORT BOX (DARK MODE FRIENDLY) */
+    /* REPORT BOX */
     .report-box {
-        /* Transparent white for subtle lift in dark mode, clean look in light mode */
         background-color: rgba(255, 255, 255, 0.05);
-        color: inherit; /* Inherits text color from theme (black or white) */
-        
-        /* Updated Padding: Top/Right/Left 25px, Bottom 50px */
+        color: inherit;
         padding: 25px 25px 50px 25px; 
-        
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         border-left: 6px solid #0056b3;
-        border: 1px solid rgba(128, 128, 128, 0.2); /* Subtle border for definition */
+        border: 1px solid rgba(128, 128, 128, 0.2);
         font-size: 16px;
         line-height: 1.6;
         margin-bottom: 10px;
@@ -243,7 +311,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 7. MODEL LOADING ---
+# --- 8. MODEL LOADING ---
 folder = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(folder, "best.pt")
 
@@ -262,7 +330,7 @@ else:
         return YOLO(model_path)
     model = load_model()
 
-# --- 8. SIDEBAR ---
+# --- 9. SIDEBAR ---
 with st.sidebar:
     if lottie_microscope:
         st_lottie(lottie_microscope, height=150, key="sidebar_anim")
@@ -280,11 +348,9 @@ with st.sidebar:
     if selected_page == "🔍 Lesion Scanner":
         st.write("⚙️ **Scanner Settings**")
         conf_threshold = st.slider("Sensitivity", 0.0, 1.0, 0.40, 0.05)
-        
-        # --- USAGE GUIDE ---
-        st.info("ℹ️ **Usage Guide**\n1. Upload a clear image of the skin.\n2. The AI will highlight anomalies.\n3. Review the generated medical report.")
+        st.info("ℹ️ **Usage Guide**\n1. Upload a clear image of the skin.\n2. The AI will highlight anomalies.\n3. Download the official PDF Report.")
 
-# --- 9. PAGE: LESION SCANNER ---
+# --- 10. PAGE: LESION SCANNER ---
 if selected_page == "🔍 Lesion Scanner":
     st.title("🔬 TUKLAS: Smart Veterinary Assistant")
     st.write("Upload a sample image to generate a diagnostic report.")
@@ -294,6 +360,11 @@ if selected_page == "🔍 Lesion Scanner":
 
     if uploaded_file:
         img = Image.open(uploaded_file)
+        
+        # Save temp image for PDF generation
+        with open("temp_analysis.jpg", "wb") as f:
+            f.write(uploaded_file.getbuffer())
+
         col1, col2 = st.columns([1, 1])
         with col1:
             st.image(img, use_column_width=True, caption="Uploaded Specimen")
@@ -304,7 +375,6 @@ if selected_page == "🔍 Lesion Scanner":
             else:
                 with st.spinner("Analyzing..."):
                     with col2:
-                        # Lottie scanning animation
                         if lottie_scanning:
                             st_lottie(lottie_scanning, height=200, key="scanning")
                     
@@ -330,73 +400,87 @@ if selected_page == "🔍 Lesion Scanner":
 
                 st.markdown("---")
                 if count == 0:
-                    # FIXED ASTERISK ISSUE: Used HTML <b> tags instead of Markdown **
                     st_green("✅ <b>Negative Result:</b> No skin lesions detected.")
                 else:
                     det_class = unique_detections[0] 
                     report = generate_smart_report(det_class, count, confidence)
                     
-                    # --- WRAPPED REPORT WITH FIXED PADDING (50px) ---
+                    # Get Medical Info for PDF
+                    info = medical_data.get(det_class)
+                    if not info:
+                         for k in medical_data.keys():
+                            if k in det_class or det_class in k:
+                                info = medical_data[k]
+                                break
+
+                    # --- WRAPPED REPORT ---
                     with st.expander("📋 AI DIAGNOSTIC REPORT", expanded=True):
                         st.markdown(f'<div class="report-box">{report}</div>', unsafe_allow_html=True)
+                        
+                        # === NEW: DOWNLOAD BUTTON ===
+                        if info:
+                            pdf_bytes = create_pdf("temp_analysis.jpg", det_class, confidence, info)
+                            st.download_button(
+                                label="📥 Download Official Lab Report (PDF)",
+                                data=pdf_bytes,
+                                file_name=f"TUKLAS_Report_{int(time.time())}.pdf",
+                                mime="application/pdf"
+                            )
+                        # ============================
                     
                     st.write("") 
 
                     # --- DETAILED PROTOCOL SECTION ---
                     for d in unique_detections:
-                        info = medical_data.get(d)
-                        if not info:
-                            # Fallback search
+                        # Re-fetch info inside loop for display
+                        d_info = medical_data.get(d)
+                        if not d_info:
                             for k in medical_data.keys():
                                 if k in d or d in k:
-                                    info = medical_data[k]
+                                    d_info = medical_data[k]
                                     break
                         
-                        if info:
+                        if d_info:
                             with st.expander(f"📌 PROTOCOL: {d}", expanded=True):
-                                # SECTION 1: OVERVIEW
-                                # FIXED BOTTOM PADDING BY USING HTML WITH MARGIN 0
-                                st.markdown(f'<p style="margin-bottom: 0px;"><b>SEVERITY STATUS:</b> <code>{info["severity"]}</code></p>', unsafe_allow_html=True)
+                                # SECTION 1
+                                st.markdown(f'<p style="margin-bottom: 0px;"><b>SEVERITY STATUS:</b> <code>{d_info["severity"]}</code></p>', unsafe_allow_html=True)
                                 st.divider()
                                 
-                                # SECTION 2: THE "WHY" AND "WHAT" (2 Cols)
+                                # SECTION 2
                                 c1, c2 = st.columns(2)
                                 with c1:
                                     st.markdown('<p class="proto-header">🧬 Origin & Transmission</p>', unsafe_allow_html=True)
-                                    st_blue(info['cause']) 
+                                    st_blue(d_info['cause']) 
                                 with c2:
                                     st.markdown('<p class="proto-header">💔 Clinical Impact</p>', unsafe_allow_html=True)
-                                    st_red(info['harm']) 
+                                    st_red(d_info['harm']) 
                                 
-                                # SECTION 3: MATERIALS & PREVENTION (2 Cols)
+                                # SECTION 3
                                 c3, c4 = st.columns(2)
                                 with c3:
                                     st.markdown('<p class="proto-header">🧰 Required Supplies</p>', unsafe_allow_html=True)
-                                    st_yellow(info['materials']) 
+                                    st_yellow(d_info['materials']) 
                                 with c4:
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
-                                    st_purple(info["prevention"])
+                                    st_purple(d_info["prevention"])
                                 
                                 st.divider()
                                 
-                                # SECTION 4: ACTION PLAN
+                                # SECTION 4
                                 st.markdown('<p class="proto-header">💊 Treatment Protocol</p>', unsafe_allow_html=True)
-                                
-                                # Build a single string for the Green Box (Treatment)
-                                # FIXED: CHANGED \n\n TO \n TO REMOVE EXTRA SPACES
                                 protocol_text = ""
-                                for step in info['steps']:
+                                for step in d_info['steps']:
                                     protocol_text += f"✅ {step}\n"
-                                
                                 st_green(protocol_text) 
 
-# --- 10. PAGE: DIRECTORY ---
+# --- 11. PAGE: DIRECTORY ---
 elif selected_page == "📞 Local Directory":
     st.title("📞 Agricultural Support Directory")
     search_term = st.text_input("🔍 Search Municipality", "")
     st.markdown("---")
 
     col1, col2 = st.columns(2)
+    # Re-inserting the contact list logic here 
     visible = [c for c in contacts_data if search_term.lower() in c['LGU'].lower() or search_term == ""]
     
     if len(visible) == 0:
@@ -410,7 +494,7 @@ elif selected_page == "📞 Local Directory":
                 st.write(f"**Phone:** `{data['Contact']}`")
                 st.write(f"**Email:** {data['Email']}")
 
-# --- 11. FOOTER ---
+# --- 12. FOOTER ---
 st.markdown("""
 <div class="footer">
     <p><strong>Rizal National Science High School (RiSci)</strong><br>
