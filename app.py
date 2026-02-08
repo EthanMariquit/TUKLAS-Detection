@@ -10,7 +10,7 @@ import datetime
 
 # --- 1. PAGE CONFIGURATION ---
 st.set_page_config(
-    page_title="TUKLAS",  # CHANGED AS REQUESTED
+    page_title="TUKLAS", 
     page_icon="🔬",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -124,7 +124,7 @@ class PDFReport(FPDF):
         self.ln(5)
         
         # 2. Lab Info (Left)
-        self.set_font('Arial', 'B', 14) # Slightly smaller header to save space
+        self.set_font('Arial', 'B', 14) 
         self.set_text_color(0)
         self.cell(0, 8, 'TUKLAS VETERINARY DIAGNOSTICS', 0, 1, 'L')
         self.set_font('Arial', '', 9)
@@ -144,7 +144,7 @@ class PDFReport(FPDF):
         self.line(10, self.get_y(), 200, self.get_y())
 
     def footer(self):
-        self.set_y(-15) # Moved footer down slightly
+        self.set_y(-15) 
         self.set_font('Arial', 'I', 7)
         self.set_text_color(128)
         
@@ -166,15 +166,14 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
     
-    # --- SPACING OPTIMIZATION START ---
-    pdf.ln(2) # Reduced top margin
+    pdf.ln(2) 
     
     # --- SECTION 1: CASE INFORMATION ---
     pdf.set_font("Arial", "B", 10)
     pdf.set_fill_color(240, 240, 240)
-    pdf.cell(0, 6, "CASE INFORMATION", 1, 1, 'L', fill=True) # Reduced height
+    pdf.cell(0, 6, "CASE INFORMATION", 1, 1, 'L', fill=True) 
     
-    pdf.set_font("Arial", "", 9) # Smaller font for grid
+    pdf.set_font("Arial", "", 9) 
     # Row 1
     pdf.cell(35, 6, "Case ID:", 1)
     pdf.cell(60, 6, f"TK-{random.randint(10000,99999)}", 1)
@@ -186,26 +185,33 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.cell(35, 6, "Methodology:", 1)
     pdf.cell(60, 6, "AI-Computer Vision (YOLOv11)", 1, 1)
     
-    pdf.ln(3) # Reduced gap
+    pdf.ln(3) 
 
-    # --- SECTION 2: SPECIMEN IMAGE (Compact) ---
+    # --- SECTION 2: SPECIMEN IMAGE (ADJUSTED SIZE) ---
     try:
         pdf.set_font("Arial", "B", 10)
         pdf.cell(0, 6, "SPECIMEN ANALYZED", 0, 1, 'L')
-        # Draw box (Reduced height to 50)
+        
+        # --- SIZE ADJUSTMENT HERE ---
+        # Increased Box Height (50 -> 62)
         y_before_img = pdf.get_y()
-        pdf.rect(10, y_before_img, 190, 50)
-        # Image (Reduced height to 45)
-        pdf.image(img_path, x=75, y=y_before_img+2.5, h=45)
-        pdf.ln(52) # Just enough space
+        pdf.rect(10, y_before_img, 190, 62) 
+        
+        # Increased Image Height (45 -> 58) - clearer image
+        pdf.image(img_path, x=75, y=y_before_img+2, h=58)
+        
+        # Increased Spacing (52 -> 64)
+        pdf.ln(64) 
+        # ----------------------------
+        
     except:
         pdf.cell(0, 10, "[Image Error]", 1, 1)
 
-    pdf.ln(3) # Reduced gap
+    pdf.ln(3)
 
     # --- SECTION 3: DIAGNOSTIC RESULT ---
     pdf.set_fill_color(230, 230, 250)
-    pdf.rect(10, pdf.get_y(), 190, 20, 'F') # Reduced box height
+    pdf.rect(10, pdf.get_y(), 190, 20, 'F') 
     
     pdf.set_font("Arial", "B", 11)
     pdf.cell(95, 8, "DETECTED CLASSIFICATION:", 0, 0, 'R')
@@ -217,7 +223,7 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.set_font("Arial", "", 10)
     pdf.cell(95, 6, "Confidence Score:", 0, 0, 'R')
     pdf.cell(95, 6, f"  {confidence:.1f}%", 0, 1, 'L')
-    pdf.ln(8) # Reduced gap
+    pdf.ln(8) 
 
     # --- SECTION 4: CLINICAL INTERPRETATION ---
     pdf.set_font("Arial", "B", 10)
@@ -251,10 +257,8 @@ def create_pdf(img_path, diagnosis, confidence, info):
         pdf.multi_cell(0, 5, clean_step)
         pdf.ln(1)
 
-    # --- SIGNATURE BLOCK (Tightened) ---
-    pdf.ln(5) # Minimal gap to keep it on page 1
-    
-    # Removed the Page Break check to force fit if possible
+    # --- SIGNATURE BLOCK ---
+    pdf.ln(5) 
     
     pdf.set_font("Arial", "B", 9)
     pdf.cell(95, 5, "Authorized by:", 0, 0, 'C')
