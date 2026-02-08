@@ -1,3 +1,4 @@
+[project]
 name = "tuklas-app"
 version = "0.1.0"
 description = "Pig Skin Lesion Detection"
@@ -9,9 +10,7 @@ dependencies = [
     "streamlit-lottie",
     "requests",
     "fpdf",
-    "pillow",
-    "streamlit-mic-recorder",  # <--- NEW: For Microphone Button
-    "SpeechRecognition",       # <--- NEW: For Voice Command Processing
+    "pillow"
 ]
 
 [tool.poetry]
