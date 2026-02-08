@@ -224,7 +224,10 @@ elif selected_page == "📞 Local Directory":
 # --- 9. FOOTER ---
 st.markdown("""
 <div class="footer">
-    <p><strong>TUKLAS Agricultural Center</strong> | 📞 Hotline: (02) 8-123-4567 | 🌐 www.tuklas-vet.ph <br>
-    📍 123 Farm Road, Barangay San Roque, Philippines | © 2025 TUKLAS Research Team</p>
+    <p><strong>Rizal National Science High School (RiSci)</strong><br>
+    📍 J.P. Rizal St., Batingan, Binangonan, Rizal<br>
+    📞 (02) 8652-2197 | ✉️ rnshs.admin@deped.gov.ph<br>
+    © 2025 Student Research Project | TUKLAS Team</p>
 </div>
 """, unsafe_allow_html=True)
+
