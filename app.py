@@ -29,7 +29,6 @@ lottie_microscope = load_lottieurl("https://lottie.host/0a927e36-6923-424d-8686-
 lottie_scanning = load_lottieurl("https://lottie.host/5a0c301c-6685-4841-8407-1e0078174f46/7Q1a54a72d.json") 
 
 # --- 3. MEDICAL KNOWLEDGE BASE ---
-# UPDATED: Using proper Markdown syntax (- ) and newlines for clean lists
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
         "severity": "🚨 CRITICAL (High Mortality Risk)",
@@ -304,16 +303,15 @@ if selected_page == "🔍 Lesion Scanner":
                                     st.warning(info['materials']) 
                                 with c4:
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
-                                    # REPLACED custom HTML with native Streamlit Success box
-                                    # This ensures it looks exactly parallel to the others
-                                    st.success(info["prevention"])
+                                    # CHANGED: Replaced st.success with a custom purple box
+                                    st.markdown(f'<div style="background-color: #E6E6FA; padding: 16px; border-radius: 8px; color: #000000;">{info["prevention"]}</div>', unsafe_allow_html=True)
                                 
                                 st.divider()
                                 
                                 # SECTION 4: ACTION PLAN
                                 st.markdown('<p class="proto-header">💊 Treatment Protocol</p>', unsafe_allow_html=True)
                                 
-                                # Build a single string for the Green Box
+                                # Build a single string for the Green Box (Treatment)
                                 protocol_text = ""
                                 for step in info['steps']:
                                     protocol_text += f"✅ {step}\n\n"
