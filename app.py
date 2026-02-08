@@ -29,8 +29,8 @@ lottie_microscope = load_lottieurl("https://lottie.host/0a927e36-6923-424d-8686-
 lottie_scanning = load_lottieurl("https://lottie.host/5a0c301c-6685-4841-8407-1e0078174f46/7Q1a54a72d.json") 
 
 # --- 3. MEDICAL KNOWLEDGE BASE ---
-# Note: lists use "- " which works in Markdown boxes. 
-# We will convert these newlines for the HTML purple box later.
+# Note: We use "- " for standard markdown lists. 
+# The code below will automatically convert these to HTML for the purple box.
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
         "severity": "🚨 CRITICAL (High Mortality Risk)",
@@ -155,17 +155,27 @@ st.markdown("""
         font-size: 16px;
         line-height: 1.6;
     }
-    /* EXACT REPLICA OF STREAMLIT ALERT BOX BUT PURPLE */
+    
+    /* CUSTOM PURPLE BOX THAT MATCHES STREAMLIT ALERT FORMAT */
     .purple-box {
         background-color: #f3e5f5; /* Light Purple Background */
         color: #311b92;           /* Deep Purple Text */
-        padding: 1rem;            /* Identical padding to st.info/st.warning */
-        border-radius: 0.5rem;    /* Identical rounded corners */
-        border: 1px solid #d1c4e9; /* Subtle border */
-        margin-bottom: 1rem;      /* Spacing */
-        line-height: 1.6;
-        font-size: 1rem;
+        padding: 1rem;            /* Match Streamlit padding */
+        border-radius: 0.5rem;    /* Match Streamlit radius */
+        border: 1px solid #d1c4e9;
+        margin-bottom: 1rem;
+        font-size: 1rem;          /* Match standard text size */
     }
+    
+    /* Target lists inside the purple box to look like Markdown lists */
+    .purple-box ul {
+        margin-bottom: 0;
+        padding-left: 1.2rem;     /* Indent bullets */
+    }
+    .purple-box li {
+        margin-bottom: 0.2rem;    /* Spacing between items */
+    }
+    
     .proto-header {
         color: #0056b3;
         font-weight: bold;
@@ -317,10 +327,18 @@ if selected_page == "🔍 Lesion Scanner":
                                 with c4:
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
                                     
-                                    # FIXED PURPLE BOX:
-                                    # We manually replace newlines with <br> so the HTML renders list items on new lines.
-                                    formatted_prevention = info["prevention"].replace("\n", "<br>")
-                                    st.markdown(f'<div class="purple-box">{formatted_prevention}</div>', unsafe_allow_html=True)
+                                    # FIXED PURPLE BOX LOGIC:
+                                    # We parse the text and build a real HTML list (<ul><li>)
+                                    # This guarantees the formatting looks exactly like the other markdown boxes.
+                                    raw_text = info["prevention"]
+                                    list_items = [line.strip().replace('- ', '').replace('• ', '') for line in raw_text.split('\n') if line.strip()]
+                                    
+                                    html_content = "<ul>"
+                                    for item in list_items:
+                                        html_content += f"<li>{item}</li>"
+                                    html_content += "</ul>"
+                                    
+                                    st.markdown(f'<div class="purple-box">{html_content}</div>', unsafe_allow_html=True)
                                 
                                 st.divider()
                                 
