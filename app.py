@@ -28,8 +28,8 @@ def load_lottieurl(url):
 lottie_microscope = load_lottieurl("https://lottie.host/0a927e36-6923-424d-8686-2484f4791e84/9z4s3l4Y2C.json") 
 lottie_scanning = load_lottieurl("https://lottie.host/5a0c301c-6685-4841-8407-1e0078174f46/7Q1a54a72d.json") 
 
-# --- 3. MEDICAL KNOWLEDGE BASE (Safe for Copy-Paste) ---
-# Using triple quotes (""") to prevent syntax errors if lines wrap
+# --- 3. MEDICAL KNOWLEDGE BASE ---
+# Triple quotes used for safety against syntax errors
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
         "severity": "🚨 CRITICAL (High Mortality Risk)",
@@ -162,6 +162,7 @@ st.markdown("""
         border-left: 6px solid #9c27b0;
         margin-bottom: 10px;
         font-size: 14px;
+        line-height: 1.5;
     }
     .proto-header {
         color: #0056b3;
@@ -269,7 +270,6 @@ if selected_page == "🔍 Lesion Scanner":
                     st.empty()
                     st.image(result_plot, use_column_width=True, caption="AI Analysis")
                     if count > 0:
-                        # RESTORED: Metric above the progress bar
                         st.metric(label="AI Confidence Score", value=f"{confidence:.1f}%")
                         st.progress(int(confidence))
 
@@ -282,7 +282,7 @@ if selected_page == "🔍 Lesion Scanner":
                     st.markdown(f'<div class="report-box">{report}</div>', unsafe_allow_html=True)
                     st.write("") 
 
-                    # RESTORED: The specific "Pre-Lottie" Layout for Protocols
+                    # --- DETAILED PROTOCOL SECTION ---
                     for d in unique_detections:
                         info = medical_data.get(d)
                         if not info:
@@ -302,19 +302,22 @@ if selected_page == "🔍 Lesion Scanner":
                                 c1, c2 = st.columns(2)
                                 with c1:
                                     st.markdown('<p class="proto-header">🧬 Origin & Transmission</p>', unsafe_allow_html=True)
-                                    st.info(info['cause'], icon="🧬") # BLUE BOX
+                                    # Removed explicit icon argument
+                                    st.info(info['cause']) 
                                 with c2:
                                     st.markdown('<p class="proto-header">💔 Clinical Impact</p>', unsafe_allow_html=True)
-                                    st.error(info['harm'], icon="💔") # RED BOX (Danger)
+                                    # Removed explicit icon argument
+                                    st.error(info['harm']) 
                                 
                                 # SECTION 3: MATERIALS & PREVENTION (2 Cols)
                                 c3, c4 = st.columns(2)
                                 with c3:
                                     st.markdown('<p class="proto-header">🧰 Required Supplies</p>', unsafe_allow_html=True)
-                                    st.warning(info['materials'], icon="🧰") # YELLOW BOX (Caution)
+                                    # Removed explicit icon argument
+                                    st.warning(info['materials']) 
                                 with c4:
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
-                                    # CUSTOM PURPLE BOX
+                                    # Custom Purple Box
                                     st.markdown(f'<div class="purple-box">{info["prevention"]}</div>', unsafe_allow_html=True)
                                 
                                 st.divider()
@@ -327,7 +330,8 @@ if selected_page == "🔍 Lesion Scanner":
                                 for step in info['steps']:
                                     protocol_text += f"✅ {step}\n\n"
                                 
-                                st.success(protocol_text, icon="💊") # GREEN BOX (Success)
+                                # Removed explicit icon argument
+                                st.success(protocol_text) 
 
 # --- 10. PAGE: DIRECTORY ---
 elif selected_page == "📞 Local Directory":
