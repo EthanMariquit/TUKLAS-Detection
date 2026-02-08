@@ -11,36 +11,58 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. MEDICAL KNOWLEDGE BASE ---
+# --- 2. EXPANDED MEDICAL KNOWLEDGE BASE ---
+# Added 'Healthy' + New Fields (Materials, Prevention)
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
-        "severity": "High (Acute)",
-        "cause": "Erysipelothrix rhusiopathiae bacteria. Often caused by sudden diet changes or contaminated soil.",
-        "harm": "Can cause high fever, septicemia (blood poisoning), and sudden death if untreated.",
+        "severity": "🚨 CRITICAL (High Mortality Risk)",
+        "cause": "Caused by *Erysipelothrix rhusiopathiae*. Bacteria persists in soil for years. Infection often follows sudden diet changes, stress, or ingestion of contaminated feces.",
+        "harm": "Rapid onset of high fever (40-42°C), septicemia (blood poisoning), abortion in pregnant sows, and sudden death if untreated within 24 hours.",
+        "materials": "• Penicillin (Injectable)\n• Sterile Syringes (16G/18G)\n• Digital Thermometer\n• Disinfectant (Phenol-based)\n• Isolation Pen",
+        "prevention": "• Vaccinate breeding herd twice yearly.\n• Quarantine new animals for 30 days.\n• Ensure proper disposal of infected bedding.",
         "steps": [
-            "Administer Penicillin (drug of choice) immediately.",
-            "Isolate the sick pig from the herd.",
-            "Disinfect pens with phenols or alkalis."
+            "IMMEDIATE: Isolate the affected animal to prevent herd spread.",
+            "TREATMENT: Administer Penicillin (1mL/10kg BW) intramuscularly every 12-24 hours.",
+            "SUPPORT: Provide electrolytes in water to combat dehydration.",
+            "MONITOR: Check temperature twice daily until fever subsides."
         ]
     },
     "Hyperkeratosis / Crusting (Sarcoptic Mange)": {
-        "severity": "Moderate (Chronic)",
-        "cause": "Sarcoptes scabiei var. suis (Mites). Spread by direct contact with infected pigs.",
-        "harm": "Severe itching leads to weight loss, slow growth, and secondary infections from scratching.",
+        "severity": "⚠️ MODERATE (Chronic / Contagious)",
+        "cause": "Caused by the mite *Sarcoptes scabiei var. suis*. The mite burrows into the skin to lay eggs. Highly contagious via direct contact or shared rubbing posts.",
+        "harm": "Intense itching causes weight loss, poor feed conversion efficiency (FCR), and secondary bacterial infections from scratching open wounds.",
+        "materials": "• Ivermectin or Doramectin\n• Knapsack Sprayer (for amitraz)\n• Skin Scraping Kit (Scalpel/Slide)\n• Protective Gloves",
+        "prevention": "• Treat sows 7-14 days before farrowing to protect piglets.\n• Treat boars every 3 months.\n• Sterilize rubbing posts and walls.",
         "steps": [
-            "Apply Ivermectin or Doramectin (injectable or feed additive).",
-            "Spray sow herds with amitraz solutions.",
-            "Treat all in-contact pigs, not just the visible ones."
+            "INJECT: Administer Ivermectin (1mL/33kg BW) subcutaneously.",
+            "SPRAY: Apply Amitraz solution to the entire herd (not just the sick pig).",
+            "REPEAT: Repeat treatment after 14 days to kill newly hatched eggs.",
+            "CLEAN: Scrub the pig with mild soap to remove crusts before spraying."
         ]
     },
     "Greasy / Exudative Skin (Greasy Pig Disease)": {
-        "severity": "High (in Piglets)",
-        "cause": "Staphylococcus hyicus bacteria. Enters through bite wounds or abrasive floors.",
-        "harm": "Causes dehydration and death in piglets; skin becomes greasy/oily and foul-smelling.",
+        "severity": "⚠️ HIGH (Especially in Piglets)",
+        "cause": "Caused by *Staphylococcus hyicus*. Bacteria enters through skin abrasions caused by fighting (needle teeth), rough concrete, or mange bites.",
+        "harm": "Toxins damage the liver and kidneys. Piglets become dehydrated rapidly due to skin fluid loss. Mortality can reach 90% in severe litters.",
+        "materials": "• Antibiotics (Amoxicillin/Lincomycin)\n• Antiseptic Soap (Betadine/Chlorhexidine)\n• Soft Cloths\n• Electrolyte Solution",
+        "prevention": "• Clip 'needle teeth' of piglets within 24 hours of birth.\n• Provide soft bedding (rice hull/sawdust) to prevent knee abrasions.\n• Maintain strict hygiene in farrowing crates.",
         "steps": [
-            "Wash pig with mild antiseptic soap and dry thoroughly.",
-            "Administer antibiotics (Amoxicillin or Lincomycin).",
-            "Clip 'needle teeth' in piglets to prevent facial biting."
+            "WASH: Gently wash the pig with antiseptic soap/solution daily.",
+            "MEDICATE: Inject Amoxicillin or Lincomycin for 3-5 days.",
+            "HYDRATE: Oral rehydration is critical for survival.",
+            "ENVIRONMENT: Ensure the pen is dry and draft-free."
+        ]
+    },
+    "Healthy": {
+        "severity": "✅ OPTIMAL",
+        "cause": "Evidence of good husbandry, proper nutrition, and effective biosecurity measures.",
+        "harm": "N/A - The animal appears to be in good physical condition.",
+        "materials": "• Routine Vitamins (B-Complex)\n• Vaccination Schedule Record\n• Standard Cleaning Supplies",
+        "prevention": "• Continue current vaccination program.\n• Maintain regular deworming schedule.\n• Monitor feed intake daily.",
+        "steps": [
+            "MAINTENANCE: Continue providing clean water and balanced feed.",
+            "MONITORING: Observe for any changes in appetite or activity.",
+            "RECORD: Log the healthy status in your farm inventory."
         ]
     }
 }
@@ -65,6 +87,11 @@ def generate_smart_report(detected_class, count, confidence):
         f"Given the high confidence (**{confidence:.1f}%**), isolation protocols should be initiated immediately.",
         f"The model's certainty is **{confidence:.1f}%**. We advise cross-referencing this with a physical exam."
     ]
+    
+    # Special override for Healthy
+    if "Healthy" in detected_class:
+        return f"Analysis complete. The system detected **{count} region(s)** classified as **Healthy Skin**. With a confidence of **{confidence:.1f}%**, the animal appears to be free of visible dermatological pathologies. Continue routine monitoring."
+
     text = f"{random.choice(intros)} {random.choice(descriptions)} {random.choice(actions)}"
     return text
 
@@ -118,6 +145,14 @@ st.markdown("""
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         font-size: 16px;
         line-height: 1.6;
+    }
+    
+    /* Protocol Header */
+    .proto-header {
+        color: #0056b3;
+        font-weight: bold;
+        font-size: 1.1em;
+        margin-bottom: 5px;
     }
 
     /* Footer */
@@ -221,8 +256,10 @@ if selected_page == "🔍 Lesion Scanner":
                 st.markdown("---")
                 st.subheader("📋 Automated Veterinary Report")
                 
+                # Logic: If nothing found, assume healthy? 
+                # OR if YOLO detects "Healthy", use that.
                 if count == 0:
-                    st.success("✅ **Negative Result:** No skin lesions detected based on current sensitivity settings. The specimen appears healthy.")
+                    st.success("✅ **Negative Result:** No specific lesions detected. The specimen appears healthy based on current sensitivity.")
                 else:
                     # 1. Generate the "Creative" Paragraph
                     primary_detection = unique_detections[0] 
@@ -231,7 +268,7 @@ if selected_page == "🔍 Lesion Scanner":
                     st.markdown(f'<div class="report-box">{report_text}</div>', unsafe_allow_html=True)
                     st.write("") 
 
-                    # 2. Show Medical Advice (Accordion Style) - FIXED FORMATTING HERE
+                    # 2. Show Medical Advice (The NEW Expanded Layout)
                     for det_class in unique_detections:
                         # Match logic
                         info = medical_data.get(det_class)
@@ -242,28 +279,38 @@ if selected_page == "🔍 Lesion Scanner":
                                     break
                         
                         if info:
-                            with st.expander(f"🔴 Issue Detected: {det_class}", expanded=True):
-                                # Top Row: Severity Badge
-                                st.markdown(f"**Severity Level:** `{info['severity']}`")
+                            # Use an Expander for the Protocol
+                            with st.expander(f"📌 PROTOCOL: {det_class}", expanded=True):
+                                # SECTION 1: OVERVIEW
+                                st.markdown(f"**SEVERITY STATUS:** `{info['severity']}`")
+                                st.divider()
                                 
-                                # Middle Row: Two Columns for Causes and Harms
+                                # SECTION 2: THE "WHY" AND "WHAT" (2 Cols)
                                 c1, c2 = st.columns(2)
                                 with c1:
-                                    st.markdown(f"**🧬 Potential Causes**\n\n{info['cause']}")
+                                    st.markdown('<p class="proto-header">🧬 Origin & Transmission</p>', unsafe_allow_html=True)
+                                    st.info(info['cause'])
                                 with c2:
-                                    st.markdown(f"**💔 Potential Harms**\n\n{info['harm']}")
+                                    st.markdown('<p class="proto-header">💔 Clinical Impact</p>', unsafe_allow_html=True)
+                                    st.warning(info['harm'])
+                                
+                                # SECTION 3: MATERIALS & PREVENTION (2 Cols)
+                                c3, c4 = st.columns(2)
+                                with c3:
+                                    st.markdown('<p class="proto-header">🧰 Required Supplies</p>', unsafe_allow_html=True)
+                                    st.markdown(info['materials'])
+                                with c4:
+                                    st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
+                                    st.markdown(info['prevention'])
                                 
                                 st.divider()
                                 
-                                # Bottom Row: Action Plan (Clean List)
-                                st.markdown("**🛡️ Recommended Actions:**")
-                                # Create a clean bulleted list string
-                                action_list = ""
+                                # SECTION 4: ACTION PLAN
+                                st.markdown('<p class="proto-header">💊 Treatment Protocol</p>', unsafe_allow_html=True)
                                 for step in info['steps']:
-                                    action_list += f"- {step}\n"
-                                st.markdown(action_list)
+                                    st.markdown(f"✅ {step}")
                         else:
-                            st.warning(f"⚠️ **Note:** The class '{det_class}' was detected, but no specific medical protocol is currently loaded in the database.")
+                            st.error(f"⚠️ **Database Error:** The class '{det_class}' was detected by the AI, but its medical data is missing. Please update `medical_data` in app.py.")
 
 # --- 9. PAGE: DIRECTORY ---
 elif selected_page == "📞 Local Directory":
