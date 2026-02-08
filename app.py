@@ -11,8 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. THE MEDICAL KNOWLEDGE BASE ---
-# These keys match the EXACT names your YOLO model was trained on.
+# --- 2. MEDICAL KNOWLEDGE BASE ---
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
         "severity": "High (Acute)",
@@ -46,33 +45,26 @@ medical_data = {
     }
 }
 
-# --- 3. THE "CREATIVE" REPORT ENGINE (NLP) ---
+# --- 3. CREATIVE REPORT GENERATOR ---
 def generate_smart_report(detected_class, count, confidence):
-    # 1. The Opening (Sets the scene)
     intros = [
         f"Analysis of the uploaded specimen indicates the presence of **{count} distinct anomaly/anomalies**.",
         f"The TUKLAS diagnostic system has flagged **{count} region(s) of interest** in this sample.",
         f"Based on visual dermatological patterns, our AI identified **{count} area(s)** requiring attention.",
         f"A thorough scan of the tissue sample reveals **{count} point(s) of concern**."
     ]
-    
-    # 2. The Diagnosis (Identifies the issue)
     descriptions = [
         f"The morphological features are highly consistent with **{detected_class}**.",
         f"The AI has classified the skin texture and discoloration patterns as **{detected_class}**.",
         f"Visual indicators suggest a high probability of **{detected_class}**.",
         f"The detected lesions exhibit characteristics typical of **{detected_class}**."
     ]
-    
-    # 3. The Action/Confidence (What to do next)
     actions = [
         f"With a confidence score of **{confidence:.1f}%**, immediate veterinary assessment is recommended.",
         f"The system is **{confidence:.1f}%** certain of this diagnosis. Please refer to the treatment protocols below.",
         f"Given the high confidence (**{confidence:.1f}%**), isolation protocols should be initiated immediately.",
         f"The model's certainty is **{confidence:.1f}%**. We advise cross-referencing this with a physical exam."
     ]
-    
-    # Mix and match them randomly!
     text = f"{random.choice(intros)} {random.choice(descriptions)} {random.choice(actions)}"
     return text
 
@@ -94,7 +86,7 @@ contacts_data = [
     {"LGU": "Teresa", "Office": "Municipal Agriculture Office", "Head": "Department Head", "Contact": "Walk-in Recommended", "Email": "agriculture@teresarizal.gov.ph"},
 ]
 
-# --- 5. CSS STYLING (The "Professional Polish") ---
+# --- 5. CSS STYLING ---
 st.markdown("""
     <style>
     .main { background-color: #f8f9fa; }
@@ -115,7 +107,7 @@ st.markdown("""
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
 
-    /* The Report Box - FORCED BLACK TEXT */
+    /* Report Box */
     .report-box {
         background-color: #ffffff;
         color: #333333; 
@@ -126,15 +118,6 @@ st.markdown("""
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         font-size: 16px;
         line-height: 1.6;
-    }
-
-    /* Contact Cards */
-    .contact-card {
-        background-color: white;
-        padding: 15px;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        border: 1px solid #e0e0e0;
     }
 
     /* Footer */
@@ -230,7 +213,6 @@ if selected_page == "🔍 Lesion Scanner":
                     st.subheader("🛡️ AI Detection Results")
                     st.image(result_plot, use_column_width=True, caption=f"Identified {count} anomalies")
                     
-                    # Show Confidence Meter (Visual Polish!)
                     if count > 0:
                         st.metric(label="AI Confidence Score", value=f"{confidence:.1f}%")
                         st.progress(int(confidence))
@@ -243,20 +225,16 @@ if selected_page == "🔍 Lesion Scanner":
                     st.success("✅ **Negative Result:** No skin lesions detected based on current sensitivity settings. The specimen appears healthy.")
                 else:
                     # 1. Generate the "Creative" Paragraph
-                    # We pick the first detection to write the story about
                     primary_detection = unique_detections[0] 
                     report_text = generate_smart_report(primary_detection, count, confidence)
                     
-                    # Display the styled box
                     st.markdown(f'<div class="report-box">{report_text}</div>', unsafe_allow_html=True)
                     st.write("") 
 
-                    # 2. Show Medical Advice (Accordion Style)
+                    # 2. Show Medical Advice (Accordion Style) - FIXED FORMATTING HERE
                     for det_class in unique_detections:
-                        # Match logic: Try exact match first
+                        # Match logic
                         info = medical_data.get(det_class)
-                        
-                        # Fallback: Check if partial match (e.g., "Erysipelas" inside "Erysipelas (Diamond Skin)")
                         if not info:
                             for key in medical_data.keys():
                                 if key in det_class or det_class in key:
@@ -264,18 +242,26 @@ if selected_page == "🔍 Lesion Scanner":
                                     break
                         
                         if info:
-                            with st.expander(f"🔴 Issue Detected: {det_class} (Click for Protocol)", expanded=True):
+                            with st.expander(f"🔴 Issue Detected: {det_class}", expanded=True):
+                                # Top Row: Severity Badge
+                                st.markdown(f"**Severity Level:** `{info['severity']}`")
+                                
+                                # Middle Row: Two Columns for Causes and Harms
                                 c1, c2 = st.columns(2)
                                 with c1:
-                                    st.markdown(f"**Severity Level:**\n{info['severity']}")
-                                    st.markdown(f"**Potential Causes:**\n{info['cause']}")
+                                    st.markdown(f"**🧬 Potential Causes**\n\n{info['cause']}")
                                 with c2:
-                                    st.markdown(f"**Potential Harms:**\n{info['harm']}")
+                                    st.markdown(f"**💔 Potential Harms**\n\n{info['harm']}")
                                 
-                                st.markdown("---")
-                                st.markdown("**⚠️ Recommended Actions:**")
+                                st.divider()
+                                
+                                # Bottom Row: Action Plan (Clean List)
+                                st.markdown("**🛡️ Recommended Actions:**")
+                                # Create a clean bulleted list string
+                                action_list = ""
                                 for step in info['steps']:
-                                    st.markdown(f"- {step}")
+                                    action_list += f"- {step}\n"
+                                st.markdown(action_list)
                         else:
                             st.warning(f"⚠️ **Note:** The class '{det_class}' was detected, but no specific medical protocol is currently loaded in the database.")
 
