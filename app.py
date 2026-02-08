@@ -205,8 +205,8 @@ st.markdown("""
         background-color: rgba(255, 255, 255, 0.05);
         color: inherit; /* Inherits text color from theme (black or white) */
         
-        /* Updated Padding: Top/Right/Left 25px, Bottom 50px */
-        padding: 25px 25px 50px 25px; 
+        /* Updated Padding: Top/Right/Left 25px, Bottom 35px */
+        padding: 25px 25px 35px 25px; 
         
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -329,7 +329,8 @@ if selected_page == "🔍 Lesion Scanner":
 
                 st.markdown("---")
                 if count == 0:
-                    st_green("✅ **Negative Result:** No skin lesions detected.")
+                    # FIXED ASTERISK ISSUE: Used HTML <b> tags instead of Markdown **
+                    st_green("✅ <b>Negative Result:</b> No skin lesions detected.")
                 else:
                     det_class = unique_detections[0] 
                     report = generate_smart_report(det_class, count, confidence)
