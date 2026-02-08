@@ -9,8 +9,10 @@ dependencies = [
     "ultralytics",
     "streamlit-lottie",
     "requests",
-    "fpdf",      # <--- REQUIRED for the PDF Report
-    "pillow",    # <--- HIGHLY RECOMMENDED for image processing
+    "fpdf",
+    "pillow",
+    "streamlit-mic-recorder",  # <--- NEW: For Microphone Button
+    "SpeechRecognition",       # <--- NEW: For Voice Command Processing
 ]
 
 [tool.poetry]
