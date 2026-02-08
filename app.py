@@ -304,9 +304,8 @@ if selected_page == "🔍 Lesion Scanner":
                                     st.warning(info['materials']) 
                                 with c4:
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
-                                    
                                     # CHANGED: Replaced st.success with a custom purple hex box
-                                    st.markdown(f'<div style="background-color: #E6E6FA; padding: 16px; border-radius: 5px; color: #000;">{info["prevention"]}</div>', unsafe_allow_html=True)
+                                    st.markdown(f'<div style="background-color: #E6E6FA; padding: 16px; border-radius: 8px; color: #000000;">{info["prevention"]}</div>', unsafe_allow_html=True)
                                 
                                 st.divider()
                                 
