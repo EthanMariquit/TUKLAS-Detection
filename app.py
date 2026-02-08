@@ -10,7 +10,7 @@ import datetime
 
 # --- 1. PAGE CONFIGURATION ---
 st.set_page_config(
-    page_title="TUKLAS Professional",
+    page_title="TUKLAS",
     page_icon="🔬",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -589,3 +589,4 @@ st.markdown("""
     © 2025 Student Research Project | TUKLAS Team</p>
 </div>
 """, unsafe_allow_html=True)
+
