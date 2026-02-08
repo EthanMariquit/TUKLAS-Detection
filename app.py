@@ -24,26 +24,43 @@ def load_lottieurl(url):
     except:
         return None
 
-# --- 2.5 CUSTOM PURPLE BOX FUNCTION ---
-def st_purple(text):
-    """Creates a custom purple alert box similar to st.success/st.error"""
-    st.markdown(f"""
-    <div style="
-        background-color: #E6E6FA; 
-        border-left: 6px solid #6A0DAD; 
-        padding: 16px; 
-        border-radius: 5px; 
-        color: #333;
-        margin-bottom: 10px;">
-        {text}
-    </div>
-    """, unsafe_allow_html=True)
+# --- 2.5 CUSTOM PURPLE BOX FUNCTION (FIXED) ---
+def st_purple(title, text):
+    """
+    Creates a custom purple alert box that supports Markdown/Newlines.
+    Args:
+        title (str): The header text (optional)
+        text (str): The main content (supports markdown bullets)
+    """
+    # We use a container with a specific background, then render markdown INSIDE it.
+    with st.container():
+        st.markdown(f"""
+        <style>
+        .purple-box {{
+            background-color: #E6E6FA; 
+            border-left: 6px solid #6A0DAD; 
+            padding: 20px; 
+            border-radius: 5px; 
+            color: #333;
+            margin-bottom: 10px;
+        }}
+        </style>
+        <div class="purple-box">
+            <strong style="color: #6A0DAD;">{title}</strong>
+            <div style="margin-top: 5px;">
+        """, unsafe_allow_html=True)
+        
+        # This renders the actual bullets properly
+        st.markdown(text)
+        
+        st.markdown("</div></div>", unsafe_allow_html=True)
 
 # Load Assets
 lottie_microscope = load_lottieurl("https://lottie.host/0a927e36-6923-424d-8686-2484f4791e84/9z4s3l4Y2C.json") 
 lottie_scanning = load_lottieurl("https://lottie.host/5a0c301c-6685-4841-8407-1e0078174f46/7Q1a54a72d.json") 
 
 # --- 3. MEDICAL KNOWLEDGE BASE ---
+# Note: I added extra newlines (\n) to ensure bullets space out correctly
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
         "severity": "🚨 CRITICAL (High Mortality Risk)",
@@ -317,10 +334,9 @@ if selected_page == "🔍 Lesion Scanner":
                                     st.markdown('<p class="proto-header">🧰 Required Supplies</p>', unsafe_allow_html=True)
                                     st.warning(info['materials']) 
                                 with c4:
+                                    # --- CHANGE APPLIED HERE (Correct function call) ---
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
-                                    
-                                    # --- CHANGE APPLIED HERE (Uses the new function) ---
-                                    st_purple(info["prevention"])
+                                    st_purple("", info["prevention"]) # Passing empty title since header is above
                                 
                                 st.divider()
                                 
