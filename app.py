@@ -205,8 +205,8 @@ st.markdown("""
         background-color: rgba(255, 255, 255, 0.05);
         color: inherit; /* Inherits text color from theme (black or white) */
         
-        /* Updated Padding: Top/Right/Left 25px, Bottom 35px */
-        padding: 25px 25px 35px 25px; 
+        /* Updated Padding: Top/Right/Left 25px, Bottom 50px */
+        padding: 25px 25px 50px 25px; 
         
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
