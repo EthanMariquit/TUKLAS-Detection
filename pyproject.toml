@@ -9,7 +9,8 @@ dependencies = [
     "ultralytics",
     "streamlit-lottie",
     "requests",
-    "fpdf",  # <--- NEW ADDITION
+    "fpdf", 
+    "pillow"# <--- NEW ADDITION
 ]
 
 [tool.poetry]
