@@ -2,6 +2,8 @@ import streamlit as st
 from PIL import Image
 import os
 import random
+import requests
+from streamlit_lottie import st_lottie
 
 # --- 1. PAGE CONFIGURATION ---
 st.set_page_config(
@@ -11,14 +13,30 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. MEDICAL KNOWLEDGE BASE ---
+# --- 2. ANIMATION LOADER ---
+def load_lottieurl(url):
+    try:
+        r = requests.get(url)
+        if r.status_code != 200:
+            return None
+        return r.json()
+    except:
+        return None
+
+# Load Assets (Microscope & Scanner)
+# These are public URLs for lightweight animations
+lottie_microscope = load_lottieurl("https://lottie.host/0a927e36-6923-424d-8686-2484f4791e84/9z4s3l4Y2C.json") 
+lottie_scanning = load_lottieurl("https://lottie.host/5a0c301c-6685-4841-8407-1e0078174f46/7Q1a54a72d.json") 
+lottie_success = load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_5tkzkblw.json") 
+
+# --- 3. MEDICAL KNOWLEDGE BASE ---
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
         "severity": "🚨 CRITICAL (High Mortality Risk)",
-        "cause": "Caused by *Erysipelothrix rhusiopathiae*. Bacteria persists in soil for years. Infection often follows sudden diet changes, stress, or ingestion of contaminated feces.",
+        "cause": "Caused by <i>Erysipelothrix rhusiopathiae</i>. Bacteria persists in soil for years. Infection often follows sudden diet changes, stress, or ingestion of contaminated feces.",
         "harm": "Rapid onset of high fever (40-42°C), septicemia (blood poisoning), abortion in pregnant sows, and sudden death if untreated within 24 hours.",
-        "materials": "• Penicillin (Injectable)\n\n• Sterile Syringes (16G/18G)\n\n• Digital Thermometer\n\n• Disinfectant (Phenol-based)\n\n• Isolation Pen",
-        "prevention": "• Vaccinate breeding herd twice yearly.\n\n• Quarantine new animals for 30 days.\n\n• Ensure proper disposal of infected bedding.",
+        "materials": "• Penicillin (Injectable)<br>• Sterile Syringes (16G/18G)<br>• Digital Thermometer<br>• Disinfectant (Phenol-based)<br>• Isolation Pen",
+        "prevention": "• Vaccinate breeding herd twice yearly.<br>• Quarantine new animals for 30 days.<br>• Ensure proper disposal of infected bedding.",
         "steps": [
             "IMMEDIATE: Isolate the affected animal to prevent herd spread.",
             "TREATMENT: Administer Penicillin (1mL/10kg BW) intramuscularly every 12-24 hours.",
@@ -28,10 +46,10 @@ medical_data = {
     },
     "Hyperkeratosis / Crusting (Sarcoptic Mange)": {
         "severity": "⚠️ MODERATE (Chronic / Contagious)",
-        "cause": "Caused by the mite *Sarcoptes scabiei var. suis*. The mite burrows into the skin to lay eggs. Highly contagious via direct contact or shared rubbing posts.",
+        "cause": "Caused by the mite <i>Sarcoptes scabiei var. suis</i>. The mite burrows into the skin to lay eggs. Highly contagious via direct contact or shared rubbing posts.",
         "harm": "Intense itching causes weight loss, poor feed conversion efficiency (FCR), and secondary bacterial infections from scratching open wounds.",
-        "materials": "• Ivermectin or Doramectin\n\n• Knapsack Sprayer (for amitraz)\n\n• Skin Scraping Kit (Scalpel/Slide)\n\n• Protective Gloves",
-        "prevention": "• Treat sows 7-14 days before farrowing to protect piglets.\n\n• Treat boars every 3 months.\n\n• Sterilize rubbing posts and walls.",
+        "materials": "• Ivermectin or Doramectin<br>• Knapsack Sprayer (for amitraz)<br>• Skin Scraping Kit (Scalpel/Slide)<br>• Protective Gloves",
+        "prevention": "• Treat sows 7-14 days before farrowing to protect piglets.<br>• Treat boars every 3 months.<br>• Sterilize rubbing posts and walls.",
         "steps": [
             "INJECT: Administer Ivermectin (1mL/33kg BW) subcutaneously.",
             "SPRAY: Apply Amitraz solution to the entire herd (not just the sick pig).",
@@ -41,10 +59,10 @@ medical_data = {
     },
     "Greasy / Exudative Skin (Greasy Pig Disease)": {
         "severity": "⚠️ HIGH (Especially in Piglets)",
-        "cause": "Caused by *Staphylococcus hyicus*. Bacteria enters through skin abrasions caused by fighting (needle teeth), rough concrete, or mange bites.",
+        "cause": "Caused by <i>Staphylococcus hyicus</i>. Bacteria enters through skin abrasions caused by fighting (needle teeth), rough concrete, or mange bites.",
         "harm": "Toxins damage the liver and kidneys. Piglets become dehydrated rapidly due to skin fluid loss. Mortality can reach 90% in severe litters.",
-        "materials": "• Antibiotics (Amoxicillin/Lincomycin)\n\n• Antiseptic Soap (Betadine/Chlorhexidine)\n\n• Soft Cloths\n\n• Electrolyte Solution",
-        "prevention": "• Clip 'needle teeth' of piglets within 24 hours of birth.\n\n• Provide soft bedding (rice hull/sawdust) to prevent knee abrasions.\n\n• Maintain strict hygiene in farrowing crates.",
+        "materials": "• Antibiotics (Amoxicillin/Lincomycin)<br>• Antiseptic Soap (Betadine/Chlorhexidine)<br>• Soft Cloths<br>• Electrolyte Solution",
+        "prevention": "• Clip 'needle teeth' of piglets within 24 hours of birth.<br>• Provide soft bedding (rice hull/sawdust) to prevent knee abrasions.<br>• Maintain strict hygiene in farrowing crates.",
         "steps": [
             "WASH: Gently wash the pig with antiseptic soap/solution daily.",
             "MEDICATE: Inject Amoxicillin or Lincomycin for 3-5 days.",
@@ -56,8 +74,8 @@ medical_data = {
         "severity": "✅ OPTIMAL",
         "cause": "Evidence of good husbandry, proper nutrition, and effective biosecurity measures.",
         "harm": "N/A - The animal appears to be in good physical condition.",
-        "materials": "• Routine Vitamins (B-Complex)\n\n• Vaccination Schedule Record\n\n• Standard Cleaning Supplies",
-        "prevention": "• Continue current vaccination program.\n\n• Maintain regular deworming schedule.\n\n• Monitor feed intake daily.",
+        "materials": "• Routine Vitamins (B-Complex)<br>• Vaccination Schedule Record<br>• Standard Cleaning Supplies",
+        "prevention": "• Continue current vaccination program.<br>• Maintain regular deworming schedule.<br>• Monitor feed intake daily.",
         "steps": [
             "MAINTENANCE: Continue providing clean water and balanced feed.",
             "MONITORING: Observe for any changes in appetite or activity.",
@@ -66,9 +84,8 @@ medical_data = {
     }
 }
 
-# --- 3. CREATIVE REPORT GENERATOR (Fixed Asterisks) ---
+# --- 4. CREATIVE REPORT GENERATOR ---
 def generate_smart_report(detected_class, count, confidence):
-    # Replaced '**' with '<b>' HTML tags for clean bolding
     intros = [
         f"Analysis of the uploaded specimen indicates the presence of <b>{count} distinct anomaly/anomalies</b>.",
         f"The TUKLAS diagnostic system has flagged <b>{count} region(s) of interest</b> in this sample.",
@@ -88,14 +105,13 @@ def generate_smart_report(detected_class, count, confidence):
         f"The model's certainty is <b>{confidence:.1f}%</b>. We advise cross-referencing this with a physical exam."
     ]
     
-    # Special override for Healthy
     if "Healthy" in detected_class:
         return f"Analysis complete. The system detected <b>{count} region(s)</b> classified as <b>Healthy Skin</b>. With a confidence of <b>{confidence:.1f}%</b>, the animal appears to be free of visible dermatological pathologies. Continue routine monitoring."
 
     text = f"{random.choice(intros)} {random.choice(descriptions)} {random.choice(actions)}"
     return text
 
-# --- 4. CONTACTS DATA ---
+# --- 5. CONTACTS DATA ---
 contacts_data = [
     {"LGU": "Angono", "Office": "Municipal Veterinary Office", "Head": "Dr. Joel V. Tuplano", "Contact": "(02) 8451-1033", "Email": "officeofthemayor.angono@gmail.com"},
     {"LGU": "Antipolo City", "Office": "City Veterinary Office", "Head": "Dr. Rocelle D. Pico", "Contact": "(02) 8689-4514", "Email": "antipolocityvet@gmail.com"},
@@ -113,7 +129,7 @@ contacts_data = [
     {"LGU": "Teresa", "Office": "Municipal Agriculture Office", "Head": "Department Head", "Contact": "Walk-in Recommended", "Email": "agriculture@teresarizal.gov.ph"},
 ]
 
-# --- 5. CSS STYLING ---
+# --- 6. CSS STYLING ---
 st.markdown("""
     <style>
     .main { background-color: #f8f9fa; }
@@ -147,7 +163,18 @@ st.markdown("""
         line-height: 1.6;
     }
     
-    /* Protocol Header */
+    /* CUSTOM PURPLE BOX FOR PREVENTION */
+    .purple-box {
+        background-color: #f3e5f5;
+        color: #333333;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 6px solid #9c27b0;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+    
+    /* Protocol Headers */
     .proto-header {
         color: #0056b3;
         font-weight: bold;
@@ -173,7 +200,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 6. MODEL LOADING ---
+# --- 7. MODEL LOADING ---
 folder = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(folder, "best.pt")
 
@@ -192,9 +219,13 @@ else:
         return YOLO(model_path)
     model = load_model()
 
-# --- 7. SIDEBAR ---
+# --- 8. SIDEBAR ---
 with st.sidebar:
-    st.image("https://img.icons8.com/fluency/96/microscope.png", width=80)
+    if lottie_microscope:
+        st_lottie(lottie_microscope, height=150, key="sidebar_anim")
+    else:
+        st.image("https://img.icons8.com/fluency/96/microscope.png", width=80)
+        
     st.title("TUKLAS Diagnostics")
     st.caption("Veterinary Skin Lesion Analysis System")
     st.markdown("---")
@@ -208,7 +239,7 @@ with st.sidebar:
         conf_threshold = st.slider("Sensitivity Threshold", 0.0, 1.0, 0.40, 0.05)
         st.info("ℹ️ **Usage Guide**\n1. Upload a clear image of the skin.\n2. The AI will highlight anomalies.\n3. Review the generated medical report.")
 
-# --- 8. PAGE: LESION SCANNER ---
+# --- 9. PAGE: LESION SCANNER ---
 if selected_page == "🔍 Lesion Scanner":
     st.title("🔬 TUKLAS: Smart Veterinary Assistant")
     st.markdown("### Automated Detection & Diagnostics")
@@ -229,7 +260,13 @@ if selected_page == "🔍 Lesion Scanner":
             if model is None:
                 st.error("Model file missing.")
             else:
-                with st.spinner("Analyzing tissue patterns..."):
+                # --- ANIMATION: PROCESSING ---
+                with st.spinner("Initializing AI Models..."):
+                    # Show scanning animation in the second column while loading
+                    with col2:
+                        if lottie_scanning:
+                            st_lottie(lottie_scanning, height=200, key="scanning")
+                    
                     # Run the AI
                     results = model.predict(img, conf=conf_threshold)
                     result_plot = results[0].plot()
@@ -245,7 +282,9 @@ if selected_page == "🔍 Lesion Scanner":
                         confs = results[0].boxes.conf.tolist()
                         confidence = (sum(confs) / len(confs)) * 100
 
+                # Clear the animation and show results
                 with col2:
+                    st.empty() # Clear animation
                     st.subheader("🛡️ AI Detection Results")
                     st.image(result_plot, use_column_width=True, caption=f"Identified {count} anomalies")
                     
@@ -259,16 +298,17 @@ if selected_page == "🔍 Lesion Scanner":
                 
                 if count == 0:
                     st.success("✅ **Negative Result:** No skin lesions detected based on current sensitivity settings. The specimen appears healthy.")
+                    if lottie_success:
+                        st_lottie(lottie_success, height=100, key="clean_bill")
                 else:
                     # 1. Generate the "Creative" Paragraph
                     primary_detection = unique_detections[0] 
                     report_text = generate_smart_report(primary_detection, count, confidence)
                     
-                    # Renders HTML directly, so '<b>' tags work now!
                     st.markdown(f'<div class="report-box">{report_text}</div>', unsafe_allow_html=True)
                     st.write("") 
 
-                    # 2. Show Medical Advice (The NEW Expanded Layout)
+                    # 2. Show Medical Advice
                     for det_class in unique_detections:
                         # Match logic
                         info = medical_data.get(det_class)
@@ -279,7 +319,6 @@ if selected_page == "🔍 Lesion Scanner":
                                     break
                         
                         if info:
-                            # Use an Expander for the Protocol
                             with st.expander(f"📌 PROTOCOL: {det_class}", expanded=True):
                                 # SECTION 1: OVERVIEW
                                 st.markdown(f"**SEVERITY STATUS:** `{info['severity']}`")
@@ -289,19 +328,20 @@ if selected_page == "🔍 Lesion Scanner":
                                 c1, c2 = st.columns(2)
                                 with c1:
                                     st.markdown('<p class="proto-header">🧬 Origin & Transmission</p>', unsafe_allow_html=True)
-                                    st.info(info['cause']) # BLUE BOX
+                                    st.info(info['cause'], icon="🧬") # BLUE BOX
                                 with c2:
                                     st.markdown('<p class="proto-header">💔 Clinical Impact</p>', unsafe_allow_html=True)
-                                    st.warning(info['harm']) # YELLOW BOX
+                                    st.error(info['harm'], icon="💔") # RED BOX (Danger)
                                 
                                 # SECTION 3: MATERIALS & PREVENTION (2 Cols)
                                 c3, c4 = st.columns(2)
                                 with c3:
                                     st.markdown('<p class="proto-header">🧰 Required Supplies</p>', unsafe_allow_html=True)
-                                    st.info(info['materials']) # BLUE BOX (Matches Origin)
+                                    st.warning(info['materials'], icon="🧰") # YELLOW BOX (Caution)
                                 with c4:
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
-                                    st.success(info['prevention']) # GREEN BOX
+                                    # CUSTOM PURPLE BOX
+                                    st.markdown(f'<div class="purple-box">{info["prevention"]}</div>', unsafe_allow_html=True)
                                 
                                 st.divider()
                                 
@@ -313,11 +353,11 @@ if selected_page == "🔍 Lesion Scanner":
                                 for step in info['steps']:
                                     protocol_text += f"✅ {step}\n\n"
                                 
-                                st.success(protocol_text) # GREEN BOX for Treatment
+                                st.success(protocol_text, icon="💊") # GREEN BOX (Success)
                         else:
                             st.error(f"⚠️ **Database Error:** The class '{det_class}' was detected by the AI, but its medical data is missing. Please update `medical_data` in app.py.")
 
-# --- 9. PAGE: DIRECTORY ---
+# --- 10. PAGE: DIRECTORY ---
 elif selected_page == "📞 Local Directory":
     st.title("📞 Agricultural Support Directory")
     st.markdown("Find your local Municipal Agriculture Office or Veterinary Office below.")
@@ -340,7 +380,7 @@ elif selected_page == "📞 Local Directory":
                 st.markdown(f"**✉️ Email:** {data['Email']}")
                 st.caption("Operating Hours: Mon-Fri, 8AM - 5PM")
 
-# --- 10. FOOTER ---
+# --- 11. FOOTER ---
 st.markdown("""
 <div class="footer">
     <p><strong>Rizal National Science High School (RiSci)</strong><br>
