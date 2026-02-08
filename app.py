@@ -551,7 +551,9 @@ if selected_page == "🔍 Lesion Scanner":
                     st.empty()
                     st.image(img_annotated, use_container_width=True, caption="AI Detection")
                     if count > 0:
-                        st.metric(label="AI Confidence Score", value=f"{confidence:.1f}%")
+                        # --- BLUE BAR ADDED HERE ---
+                        st.info(f"**AI Confidence Assessment**")
+                        st.metric(label="Model Certainty", value=f"{confidence:.1f}%")
 
                 st.markdown("---")
                 if count == 0:
