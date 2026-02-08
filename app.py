@@ -123,7 +123,7 @@ class PDFReport(FPDF):
         self.rect(0, 0, 210, 5, 'F')
         self.ln(5)
         
-        # 2. Lab Info (Left)
+        # 2. Lab Info (Left) - Takes approx 25mm height
         self.set_font('Arial', 'B', 16)
         self.set_text_color(0)
         self.cell(0, 10, 'TUKLAS VETERINARY DIAGNOSTICS', 0, 1, 'L')
@@ -132,21 +132,20 @@ class PDFReport(FPDF):
         self.cell(0, 5, 'J.P. Rizal St., Batingan, Binangonan, Rizal', 0, 1, 'L')
         self.cell(0, 5, 'Phone: (02) 8652-2197 | Email: tuklas-risci@gmail.com', 0, 1, 'L')
         
-        # 3. Report Title (Right Aligned)
+        # 3. Report Title (Right Aligned) - Floating
         self.set_y(15)
         self.set_font('Arial', 'B', 20)
         self.set_text_color(150) # Gray
         self.cell(0, 10, 'LABORATORY REPORT', 0, 1, 'R')
         
-        # 4. Horizontal Line
-        # REDUCED SPACE HERE
-        self.ln(5) 
+        # 4. Horizontal Line - FIX: Force Y position down to clear left-side text
+        self.set_y(40) 
         self.set_draw_color(0)
         self.line(10, self.get_y(), 200, self.get_y())
-        self.ln(2)
+        self.ln(5) # Small buffer after line
 
     def footer(self):
-        self.set_y(-20) # Moved footer down slightly
+        self.set_y(-20) # Footer position
         self.set_font('Arial', 'I', 8)
         self.set_text_color(128)
         
@@ -168,15 +167,18 @@ def clean_text(text):
 
 def create_pdf(img_path, diagnosis, confidence, info):
     pdf = PDFReport()
-    pdf.set_auto_page_break(auto=True, margin=15) # Reduced margin to fit more
+    pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
     
-    # --- NO EXTRA SPACING AFTER HEADER ---
+    # --- FIX: Ensure Case Info starts after header clears ---
+    # The header now ends at Y=45 (40 + 5). We don't need huge space, 
+    # but a small ln(2) keeps it clean.
+    pdf.ln(2) 
     
     # --- SECTION 1: PATIENT / CASE INFORMATION (Grid Layout) ---
     pdf.set_font("Arial", "B", 10)
     pdf.set_fill_color(240, 240, 240) # Light Gray Header
-    pdf.cell(0, 7, "CASE INFORMATION", 1, 1, 'L', fill=True) # Reduced Height 8->7
+    pdf.cell(0, 7, "CASE INFORMATION", 1, 1, 'L', fill=True)
     
     pdf.set_font("Arial", "", 10)
     # Row 1
@@ -190,19 +192,17 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.cell(35, 7, "Methodology:", 1)
     pdf.cell(60, 7, "AI-Computer Vision (YOLOv11)", 1, 1)
     
-    # --- REDUCED SPACING ---
     pdf.ln(2)
 
-    # --- SECTION 2: SPECIMEN IMAGE (SHRUNK SIGNIFICANTLY) ---
+    # --- SECTION 2: SPECIMEN IMAGE (SHRUNK to save space) ---
     try:
         pdf.set_font("Arial", "B", 10)
         pdf.cell(0, 6, "SPECIMEN ANALYZED", 0, 1, 'L')
-        # Draw box around image area (Shrunk height 50->40)
+        # Draw box around image area (Height 40)
         y_before_img = pdf.get_y()
         pdf.rect(10, y_before_img, 190, 40)
-        # Image centered inside (Shrunk height 45->35)
+        # Image centered inside (Height 35)
         pdf.image(img_path, x=80, y=y_before_img+2, h=35)
-        # Reduced spacing 52->42
         pdf.ln(42)
     except:
         pdf.cell(0, 10, "[Image Error]", 1, 1)
@@ -211,7 +211,7 @@ def create_pdf(img_path, diagnosis, confidence, info):
 
     # --- SECTION 3: DIAGNOSTIC RESULT (Formal Box) ---
     pdf.set_fill_color(230, 230, 250) 
-    pdf.rect(10, pdf.get_y(), 190, 20, 'F') # Reduced box height 25->20
+    pdf.rect(10, pdf.get_y(), 190, 20, 'F')
     
     pdf.set_font("Arial", "B", 11)
     pdf.cell(95, 8, "DETECTED CLASSIFICATION:", 0, 0, 'R')
@@ -223,7 +223,7 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.set_font("Arial", "", 10)
     pdf.cell(95, 6, "Confidence Score:", 0, 0, 'R')
     pdf.cell(95, 6, f"  {confidence:.1f}%", 0, 1, 'L')
-    pdf.ln(8) # Reduced spacing after result 10->8
+    pdf.ln(8) 
 
     # --- SECTION 4: CLINICAL INTERPRETATION ---
     pdf.set_font("Arial", "B", 11)
@@ -237,7 +237,7 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.set_font("Arial", "", 10)
     pdf.cell(0, 5, clean_text(info['severity']), 0, 1)
     
-    # Cause - Reduced line height 6->5
+    # Cause
     pdf.set_font("Arial", "B", 10)
     pdf.cell(30, 5, "Etiology:", 0)
     pdf.set_font("Arial", "", 10)
@@ -253,14 +253,12 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.set_font("Arial", "", 10)
     for i, step in enumerate(info['steps'], 1):
         clean_step = clean_text(step)
-        pdf.cell(10, 5, f"{i}.", 0, 0) # Reduced cell height 6->5
-        pdf.multi_cell(0, 5, clean_step) # Reduced cell height 6->5
-        # Removed the extra ln(1) here to save space
+        pdf.cell(10, 5, f"{i}.", 0, 0)
+        pdf.multi_cell(0, 5, clean_step)
 
-    # --- SIGNATURE BLOCK (Aggressively pulled up) ---
+    # --- SIGNATURE BLOCK (Tight fit for Page 1) ---
     pdf.ln(3) 
     
-    # Check if we are too close to the bottom (250mm)
     if pdf.get_y() > 250:
         pdf.add_page()
     
@@ -268,7 +266,7 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.cell(95, 5, "Authorized by:", 0, 0, 'C')
     pdf.cell(95, 5, "Verified by (Veterinarian):", 0, 1, 'C')
     
-    pdf.ln(8) # Reduced signing space 10->8
+    pdf.ln(8)
     pdf.set_font("Courier", "", 12)
     pdf.cell(95, 5, "/s/ TUKLAS AI SYSTEM v1.0", 0, 0, 'C')
     pdf.cell(95, 5, "__________________________", 0, 1, 'C')
