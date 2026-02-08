@@ -151,7 +151,10 @@ contacts_data = [
 # --- 6. CSS STYLING (THEMED) ---
 st.markdown("""
     <style>
-    .main { background-color: #f8f9fa; }
+    /* REMOVE HARDCODED MAIN BACKGROUND SO STREAMLIT THEME WORKS */
+    .stApp {
+        /* No specific background set here to allow dark mode to work */
+    }
     
     .stButton>button {
         width: 100%;
@@ -168,7 +171,7 @@ st.markdown("""
     .purple-box, .blue-box, .red-box, .yellow-box, .green-box {
         padding: 16px;
         border-radius: 5px;
-        color: inherit;
+        color: inherit; /* Adapts to Dark/Light mode text color */
         font-family: 'Source Sans Pro', sans-serif;
         margin-bottom: 10px;
         white-space: pre-wrap;
@@ -196,15 +199,19 @@ st.markdown("""
         border: 1px solid #00C853;
     }
 
-    /* REPORT BOX (FIXED PADDING) */
+    /* REPORT BOX (DARK MODE FRIENDLY) */
     .report-box {
-        background-color: #ffffff;
-        color: #333;
-        /* Increased bottom padding to 35px */
-        padding: 25px 25px 35px 25px; 
+        /* Transparent white for subtle lift in dark mode, clean look in light mode */
+        background-color: rgba(255, 255, 255, 0.05);
+        color: inherit; /* Inherits text color from theme (black or white) */
+        
+        /* Updated Padding: Top/Right/Left 25px, Bottom 50px */
+        padding: 25px 25px 50px 25px; 
+        
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         border-left: 6px solid #0056b3;
+        border: 1px solid rgba(128, 128, 128, 0.2); /* Subtle border for definition */
         font-size: 16px;
         line-height: 1.6;
         margin-bottom: 10px;
