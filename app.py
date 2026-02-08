@@ -355,7 +355,8 @@ if selected_page == "🔍 Lesion Scanner":
                         if info:
                             with st.expander(f"📌 PROTOCOL: {d}", expanded=True):
                                 # SECTION 1: OVERVIEW
-                                st.markdown(f"**SEVERITY STATUS:** `{info['severity']}`")
+                                # FIXED BOTTOM PADDING BY USING HTML WITH MARGIN 0
+                                st.markdown(f'<p style="margin-bottom: 0px;"><b>SEVERITY STATUS:</b> <code>{info["severity"]}</code></p>', unsafe_allow_html=True)
                                 st.divider()
                                 
                                 # SECTION 2: THE "WHY" AND "WHAT" (2 Cols)
