@@ -40,7 +40,7 @@ def st_green(text):  custom_box(text, "green-box")
 lottie_microscope = load_lottieurl("https://lottie.host/0a927e36-6923-424d-8686-2484f4791e84/9z4s3l4Y2C.json") 
 lottie_scanning = load_lottieurl("https://lottie.host/5a0c301c-6685-4841-8407-1e0078174f46/7Q1a54a72d.json") 
 
-# --- 3. MEDICAL KNOWLEDGE BASE ---
+# --- 3. MEDICAL KNOWLEDGE BASE (Updated with Dosage Info) ---
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
         "severity": "CRITICAL (High Mortality Risk)",
@@ -55,7 +55,11 @@ medical_data = {
             "TREATMENT: Administer Penicillin (1mL/10kg BW) intramuscularly every 12-24 hours.",
             "SUPPORT: Provide electrolytes in water to combat dehydration.",
             "MONITOR: Check temperature twice daily until fever subsides."
-        ]
+        ],
+        # --- NEW DOSAGE DATA ---
+        "drug_name": "Penicillin G",
+        "dosage_rate": 1.0, # mL
+        "dosage_per_kg": 10.0 # per kg
     },
     "Hyperkeratosis / Crusting (Sarcoptic Mange)": {
         "severity": "MODERATE (Chronic / Contagious)",
@@ -70,7 +74,11 @@ medical_data = {
             "SPRAY: Apply Amitraz solution to the entire herd (not just the sick pig).",
             "REPEAT: Repeat treatment after 14 days to kill newly hatched eggs.",
             "CLEAN: Scrub the pig with mild soap to remove crusts before spraying."
-        ]
+        ],
+        # --- NEW DOSAGE DATA ---
+        "drug_name": "Ivermectin (1%)",
+        "dosage_rate": 1.0,
+        "dosage_per_kg": 33.0
     },
     "Greasy / Exudative Skin (Greasy Pig Disease)": {
         "severity": "HIGH (Especially in Piglets)",
@@ -85,7 +93,11 @@ medical_data = {
             "MEDICATE: Inject Amoxicillin or Lincomycin for 3-5 days.",
             "HYDRATE: Oral rehydration is critical for survival.",
             "ENVIRONMENT: Ensure the pen is dry and draft-free."
-        ]
+        ],
+        # --- NEW DOSAGE DATA ---
+        "drug_name": "Amoxicillin LA",
+        "dosage_rate": 1.0,
+        "dosage_per_kg": 20.0
     },
     "Healthy": {
         "severity": "OPTIMAL",
@@ -99,7 +111,11 @@ medical_data = {
             "MAINTENANCE: Continue providing clean water and balanced feed.",
             "MONITORING: Observe for any changes in appetite or activity.",
             "RECORD: Log the healthy status in your farm inventory."
-        ]
+        ],
+        # --- NEW DOSAGE DATA ---
+        "drug_name": "Multivitamins",
+        "dosage_rate": 1.0,
+        "dosage_per_kg": 10.0
     }
 }
 
@@ -402,6 +418,29 @@ with st.sidebar:
     st.markdown("---")
     
     selected_page = st.selectbox("Navigate", ["🔍 Lesion Scanner", "📞 Local Directory"])
+    
+    # --- NEW FEATURE: DOSAGE CALCULATOR (Sidebar) ---
+    st.markdown("---")
+    st.subheader("💊 Rx Dosage Calculator")
+    st.caption("Calculate injection volume based on body weight.")
+    
+    calc_weight = st.number_input("Pig Weight (kg)", min_value=1.0, value=50.0, step=0.5)
+    
+    # Get drug options dynamically from medical_data
+    drug_options = ["Select Drug..."] + [v['drug_name'] for k, v in medical_data.items() if 'drug_name' in v]
+    selected_drug = st.selectbox("Medication", drug_options)
+    
+    if selected_drug != "Select Drug...":
+        # Find the drug info
+        drug_info = next((v for k, v in medical_data.items() if v.get('drug_name') == selected_drug), None)
+        if drug_info:
+            vol = (calc_weight / drug_info['dosage_per_kg']) * drug_info['dosage_rate']
+            st.info(f"**Administer:** {vol:.2f} mL")
+            st.caption(f"Dosage Rate: {drug_info['dosage_rate']}mL per {drug_info['dosage_per_kg']}kg")
+        else:
+            st.error("Drug data unavailable.")
+    # ------------------------------------------------
+    
     st.markdown("---")
 
     conf_threshold = 0.25
