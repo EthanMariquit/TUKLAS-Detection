@@ -161,20 +161,6 @@ st.markdown("""
         margin-top: 10px;
     }
     
-    /* MAGIC CSS FIX: 
-       Target the native "Success" (Green) box and force it to be Purple.
-       This preserves the perfect layout/padding of the native component.
-    */
-    div[data-testid="stAlert"] > div[role="alert"] {
-        /* This ensures we target the inner container if needed */
-    }
-    
-    /* Overwrite styles for "Success" type alerts to be Purple */
-    .st-emotion-cache-12w0qpk, /* Newer Streamlit versions */
-    div[data-baseweb="notification"][class*="st-"] {
-        /* Note: We rely on the fact that we are only using st.success for the purple items */
-    }
-
     /* Footer Style */
     .footer {
         position: fixed;
@@ -319,50 +305,31 @@ if selected_page == "🔍 Lesion Scanner":
                                 with c4:
                                     st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
                                     
-                                    # --- THE FIX ---
-                                    # 1. We use the native st.success box (Green) so it has PERFECT formatting.
-                                    # 2. We inject a STYLE tag right here that forces THIS box to be Purple.
+                                    # --- THE FIX: MANUAL PURPLE BOX ---
+                                    # We construct the list items manually to match the exact spacing of st.warning
+                                    raw_text = info["prevention"]
+                                    list_items = [line.strip().replace('- ', '').replace('• ', '') for line in raw_text.split('\n') if line.strip()]
                                     
-                                    st.markdown("""
-                                    <style>
-                                    /* Force the background of the immediate next alert to Purple */
-                                    div[data-testid="stAlert"] {
-                                        background-color: transparent;
-                                    }
-                                    /* Target specific success alerts in this container */
-                                    .purple-override {
-                                        background-color: #f3e5f5 !important;
-                                        color: #311b92 !important;
-                                        border: 1px solid #d1c4e9 !important;
-                                        padding: 16px;
-                                        border-radius: 8px;
-                                    }
-                                    </style>
-                                    """, unsafe_allow_html=True)
+                                    # Create HTML List with corrected padding to match Streamlit's native look
+                                    html_list = ""
+                                    for item in list_items:
+                                        html_list += f"<li style='margin-bottom: 0.2rem;'>{item}</li>"
 
-                                    # We wrap the content in a div with our override class using raw HTML,
-                                    # BUT we let Streamlit render the bullets by using a native box.
-                                    # Actually, since native boxes are hard to style individually without affecting others,
-                                    # We will use the native st.success, and accept that "Action/Prevention" = Green/Purple.
-                                    
-                                    # THE HACK: We use st.markdown with a custom DIV that *replicates* Streamlit's Markdown list style perfectly.
-                                    # We set the list-style-position to 'outside' and padding-left to 1.2em.
-                                    
-                                    prevention_html = info["prevention"].replace('\n', '</li><li style="margin-bottom: 0px;">').replace('- ', '').replace('• ', '')
-                                    prevention_html = f'<ul style="margin: 0; padding-left: 1.2rem; list-style-type: disc;"><li>{prevention_html}</li></ul>'
-                                    
+                                    # The Box Container
                                     st.markdown(f"""
                                         <div style="
                                             background-color: #f3e5f5;
                                             border: 1px solid #d1c4e9;
                                             padding: 1rem;
+                                            padding-left: 1.2rem;
                                             border-radius: 0.5rem;
                                             color: #311b92;
                                             font-size: 1rem;
-                                            line-height: 1.6;
                                             margin-bottom: 1rem;
                                         ">
-                                            {prevention_html}
+                                            <ul style="margin: 0; padding-left: 1rem;">
+                                                {html_list}
+                                            </ul>
                                         </div>
                                     """, unsafe_allow_html=True)
                                 
