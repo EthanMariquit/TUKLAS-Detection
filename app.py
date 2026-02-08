@@ -11,7 +11,7 @@ import numpy as np
 
 # --- 1. PAGE CONFIGURATION ---
 st.set_page_config(
-    page_title="TUKLAS Professional",
+    page_title="TUKLAS",
     page_icon="🔬",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -492,6 +492,14 @@ with st.sidebar:
     if selected_page == "🔍 Lesion Scanner":
         st.write("⚙️ **Scanner Settings**")
         conf_threshold = st.slider("Sensitivity", 0.0, 1.0, 0.40, 0.05)
+        
+        # --- RESTORED GUIDE ---
+        st.markdown("---")
+        with st.expander("📖 Quick Guide", expanded=True):
+            st.write("1. **Upload** a clear photo of the skin lesion.")
+            st.write("2. **Adjust** sensitivity if detection is too weak/strong.")
+            st.write("3. **Review** the AI analysis and generated report.")
+            st.write("4. **Consult** a licensed vet for final diagnosis.")
 
 # --- 10. PAGE: LESION SCANNER ---
 if selected_page == "🔍 Lesion Scanner":
@@ -551,9 +559,10 @@ if selected_page == "🔍 Lesion Scanner":
                     st.empty()
                     st.image(img_annotated, use_container_width=True, caption="AI Detection")
                     if count > 0:
-                        # --- BLUE BAR ADDED HERE ---
-                        st.info(f"**AI Confidence Assessment**")
-                        st.metric(label="Model Certainty", value=f"{confidence:.1f}%")
+                        # --- BLUE PROGRESS BAR + REVERTED LABEL ---
+                        st.write("<b>Confidence Level:</b>", unsafe_allow_html=True)
+                        st.progress(int(confidence))
+                        st.metric(label="AI Confidence Score", value=f"{confidence:.1f}%")
 
                 st.markdown("---")
                 if count == 0:
