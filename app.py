@@ -5,7 +5,7 @@ import random
 import requests
 import time
 from streamlit_lottie import st_lottie
-from fpdf import FPDF  # <--- NEW LIBRARY FOR PDF
+from fpdf import FPDF
 import datetime
 
 # --- 1. PAGE CONFIGURATION ---
@@ -103,19 +103,14 @@ medical_data = {
     }
 }
 
-# --- 4. PDF GENERATOR ENGINE ---
+# --- 4. PDF GENERATOR ENGINE (FIXED) ---
 class PDFReport(FPDF):
     def header(self):
-        # Header Color
-        self.set_fill_color(0, 86, 179) # Blue
+        self.set_fill_color(0, 86, 179) 
         self.rect(0, 0, 210, 40, 'F')
-        
-        # Title
         self.set_font('Arial', 'B', 24)
         self.set_text_color(255, 255, 255)
         self.cell(0, 20, 'TUKLAS DIAGNOSTICS', 0, 1, 'C')
-        
-        # Subtitle
         self.set_font('Arial', 'I', 12)
         self.cell(0, 10, 'Veterinary Skin Lesion Analysis System | RiSci Research', 0, 1, 'C')
         self.ln(10)
@@ -125,6 +120,11 @@ class PDFReport(FPDF):
         self.set_font('Arial', 'I', 8)
         self.set_text_color(128)
         self.cell(0, 10, 'Disclaimer: This is an AI-generated report. Consult a licensed veterinarian for final diagnosis.', 0, 0, 'C')
+
+def clean_text(text):
+    """Removes emojis and non-latin characters to prevent PDF crashes"""
+    if not isinstance(text, str): return str(text)
+    return text.encode('latin-1', 'ignore').decode('latin-1')
 
 def create_pdf(img_path, diagnosis, confidence, info):
     pdf = PDFReport()
@@ -141,7 +141,6 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.set_font("Arial", "B", 14)
     pdf.cell(0, 10, "SPECIMEN ANALYSIS", 0, 1, 'L')
     try:
-        # Centering Image
         img_width = 100
         x_pos = (210 - img_width) / 2
         pdf.image(img_path, x=x_pos, w=img_width)
@@ -157,8 +156,10 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.set_font("Arial", "B", 16)
     pdf.cell(20)
     pdf.cell(50, 10, "DETECTED:", 0, 0)
-    pdf.set_text_color(200, 0, 0) # Red
-    pdf.cell(0, 10, diagnosis.upper(), 0, 1)
+    pdf.set_text_color(200, 0, 0)
+    
+    # FIX: Clean diagnosis text
+    pdf.cell(0, 10, clean_text(diagnosis.upper()), 0, 1)
     
     pdf.set_text_color(0)
     pdf.cell(20)
@@ -168,8 +169,11 @@ def create_pdf(img_path, diagnosis, confidence, info):
     
     pdf.cell(20)
     pdf.cell(50, 10, "SEVERITY:", 0, 0)
-    # Handle severity text to fit
-    sev_text = info['severity'][:60] + "..." if len(info['severity']) > 60 else info['severity']
+    
+    # FIX: Clean severity text
+    raw_sev = info['severity']
+    clean_sev = clean_text(raw_sev)
+    sev_text = clean_sev[:60] + "..." if len(clean_sev) > 60 else clean_sev
     pdf.cell(0, 10, sev_text, 0, 1)
     pdf.ln(10)
     
@@ -177,15 +181,15 @@ def create_pdf(img_path, diagnosis, confidence, info):
     pdf.set_font("Arial", "B", 14)
     pdf.set_text_color(0, 86, 179)
     pdf.cell(0, 10, "RECOMMENDED TREATMENT PROTOCOL", 0, 1, 'L')
-    pdf.line(10, pdf.get_y(), 200, pdf.get_y()) # Line
+    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
     pdf.ln(5)
     
     pdf.set_font("Arial", "", 11)
     pdf.set_text_color(0)
     
     for step in info['steps']:
-        # Clean text for PDF (remove emojis sometimes causes issues in basic FPDF)
-        clean_step = step.encode('latin-1', 'replace').decode('latin-1') 
+        # FIX: Clean step text
+        clean_step = clean_text(step)
         pdf.multi_cell(0, 8, f"- {clean_step}")
         pdf.ln(1)
         
@@ -241,11 +245,7 @@ contacts_data = [
 # --- 7. CSS STYLING (THEMED) ---
 st.markdown("""
     <style>
-    /* REMOVE HARDCODED MAIN BACKGROUND SO STREAMLIT THEME WORKS */
-    .stApp {
-        /* No specific background set here to allow dark mode to work */
-    }
-    
+    .stApp { }
     .stButton>button {
         width: 100%;
         background-color: #0056b3;
@@ -255,8 +255,6 @@ st.markdown("""
         height: 3em;
         border: none;
     }
-
-    /* --- CUSTOM BOX STYLES --- */
     .purple-box, .blue-box, .red-box, .yellow-box, .green-box {
         padding: 16px;
         border-radius: 5px;
@@ -272,7 +270,6 @@ st.markdown("""
     .yellow-box { background-color: rgba(255, 170, 0, 0.1); border: 1px solid #FFAA00; }
     .green-box { background-color: rgba(0, 200, 83, 0.1); border: 1px solid #00C853; }
 
-    /* REPORT BOX */
     .report-box {
         background-color: rgba(255, 255, 255, 0.05);
         color: inherit;
@@ -294,7 +291,6 @@ st.markdown("""
         margin-top: 10px;
     }
     
-    /* FOOTER */
     .footer {
         position: fixed;
         left: 0;
@@ -355,19 +351,17 @@ if selected_page == "🔍 Lesion Scanner":
     st.title("🔬 TUKLAS: Smart Veterinary Assistant")
     st.write("Upload a sample image to generate a diagnostic report.")
 
-    # File Uploader
     uploaded_file = st.file_uploader("Upload Image", type=['jpg', 'png', 'jpeg'])
 
     if uploaded_file:
         img = Image.open(uploaded_file)
         
-        # Save temp image for PDF generation
         with open("temp_analysis.jpg", "wb") as f:
             f.write(uploaded_file.getbuffer())
 
         col1, col2 = st.columns([1, 1])
         with col1:
-            st.image(img, use_column_width=True, caption="Uploaded Specimen")
+            st.image(img, use_container_width=True, caption="Uploaded Specimen")
 
         if st.button("🔍 Generate Report"):
             if model is None:
@@ -378,7 +372,6 @@ if selected_page == "🔍 Lesion Scanner":
                         if lottie_scanning:
                             st_lottie(lottie_scanning, height=200, key="scanning")
                     
-                    # Run AI
                     results = model.predict(img, conf=conf_threshold)
                     result_plot = results[0].plot()
                     
@@ -393,7 +386,7 @@ if selected_page == "🔍 Lesion Scanner":
 
                 with col2:
                     st.empty()
-                    st.image(result_plot, use_column_width=True, caption="AI Analysis")
+                    st.image(result_plot, use_container_width=True, caption="AI Analysis")
                     if count > 0:
                         st.metric(label="AI Confidence Score", value=f"{confidence:.1f}%")
                         st.progress(int(confidence))
@@ -405,7 +398,6 @@ if selected_page == "🔍 Lesion Scanner":
                     det_class = unique_detections[0] 
                     report = generate_smart_report(det_class, count, confidence)
                     
-                    # Get Medical Info for PDF
                     info = medical_data.get(det_class)
                     if not info:
                          for k in medical_data.keys():
@@ -413,11 +405,9 @@ if selected_page == "🔍 Lesion Scanner":
                                 info = medical_data[k]
                                 break
 
-                    # --- WRAPPED REPORT ---
                     with st.expander("📋 AI DIAGNOSTIC REPORT", expanded=True):
                         st.markdown(f'<div class="report-box">{report}</div>', unsafe_allow_html=True)
                         
-                        # === NEW: DOWNLOAD BUTTON ===
                         if info:
                             pdf_bytes = create_pdf("temp_analysis.jpg", det_class, confidence, info)
                             st.download_button(
@@ -426,13 +416,10 @@ if selected_page == "🔍 Lesion Scanner":
                                 file_name=f"TUKLAS_Report_{int(time.time())}.pdf",
                                 mime="application/pdf"
                             )
-                        # ============================
                     
                     st.write("") 
 
-                    # --- DETAILED PROTOCOL SECTION ---
                     for d in unique_detections:
-                        # Re-fetch info inside loop for display
                         d_info = medical_data.get(d)
                         if not d_info:
                             for k in medical_data.keys():
@@ -442,11 +429,9 @@ if selected_page == "🔍 Lesion Scanner":
                         
                         if d_info:
                             with st.expander(f"📌 PROTOCOL: {d}", expanded=True):
-                                # SECTION 1
                                 st.markdown(f'<p style="margin-bottom: 0px;"><b>SEVERITY STATUS:</b> <code>{d_info["severity"]}</code></p>', unsafe_allow_html=True)
                                 st.divider()
                                 
-                                # SECTION 2
                                 c1, c2 = st.columns(2)
                                 with c1:
                                     st.markdown('<p class="proto-header">🧬 Origin & Transmission</p>', unsafe_allow_html=True)
@@ -455,7 +440,6 @@ if selected_page == "🔍 Lesion Scanner":
                                     st.markdown('<p class="proto-header">💔 Clinical Impact</p>', unsafe_allow_html=True)
                                     st_red(d_info['harm']) 
                                 
-                                # SECTION 3
                                 c3, c4 = st.columns(2)
                                 with c3:
                                     st.markdown('<p class="proto-header">🧰 Required Supplies</p>', unsafe_allow_html=True)
@@ -466,21 +450,18 @@ if selected_page == "🔍 Lesion Scanner":
                                 
                                 st.divider()
                                 
-                                # SECTION 4
                                 st.markdown('<p class="proto-header">💊 Treatment Protocol</p>', unsafe_allow_html=True)
                                 protocol_text = ""
                                 for step in d_info['steps']:
                                     protocol_text += f"✅ {step}\n"
                                 st_green(protocol_text) 
 
-# --- 11. PAGE: DIRECTORY ---
 elif selected_page == "📞 Local Directory":
     st.title("📞 Agricultural Support Directory")
     search_term = st.text_input("🔍 Search Municipality", "")
     st.markdown("---")
 
     col1, col2 = st.columns(2)
-    # Re-inserting the contact list logic here 
     visible = [c for c in contacts_data if search_term.lower() in c['LGU'].lower() or search_term == ""]
     
     if len(visible) == 0:
@@ -494,7 +475,6 @@ elif selected_page == "📞 Local Directory":
                 st.write(f"**Phone:** `{data['Contact']}`")
                 st.write(f"**Email:** {data['Email']}")
 
-# --- 12. FOOTER ---
 st.markdown("""
 <div class="footer">
     <p><strong>Rizal National Science High School (RiSci)</strong><br>
