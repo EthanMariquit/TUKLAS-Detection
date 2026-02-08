@@ -196,17 +196,19 @@ st.markdown("""
         border: 1px solid #00C853;
     }
 
-    /* REPORT BOX */
+    /* REPORT BOX (FIXED PADDING) */
     .report-box {
         background-color: #ffffff;
         color: #333;
-        padding: 25px;
+        /* Padding: Top Right Bottom Left */
+        padding: 20px 20px 15px 20px; 
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         border-left: 6px solid #0056b3;
         font-size: 16px;
         line-height: 1.6;
     }
+    
     .proto-header {
         color: #0056b3;
         font-weight: bold;
@@ -324,7 +326,7 @@ if selected_page == "🔍 Lesion Scanner":
                     det_class = unique_detections[0] 
                     report = generate_smart_report(det_class, count, confidence)
                     
-                    # --- WRAPPED THE REPORT IN AN EXPANDER ---
+                    # --- WRAPPED REPORT WITH FIXED PADDING ---
                     with st.expander("📋 AI DIAGNOSTIC REPORT", expanded=True):
                         st.markdown(f'<div class="report-box">{report}</div>', unsafe_allow_html=True)
                     
