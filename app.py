@@ -130,7 +130,6 @@ class PDFReport(FPDF):
         self.set_font('Arial', '', 10)
         self.cell(0, 5, 'Rizal National Science High School (RiSci)', 0, 1, 'L')
         self.cell(0, 5, 'J.P. Rizal St., Batingan, Binangonan, Rizal', 0, 1, 'L')
-        # UPDATED EMAIL HERE
         self.cell(0, 5, 'Phone: (02) 8652-2197 | Email: tuklas-risci@gmail.com', 0, 1, 'L')
         
         # 3. Report Title (Right Aligned)
@@ -140,13 +139,14 @@ class PDFReport(FPDF):
         self.cell(0, 10, 'LABORATORY REPORT', 0, 1, 'R')
         
         # 4. Horizontal Line
-        self.ln(10)
+        # REDUCED SPACE HERE
+        self.ln(5) 
         self.set_draw_color(0)
         self.line(10, self.get_y(), 200, self.get_y())
-        self.ln(5)
+        self.ln(2)
 
     def footer(self):
-        self.set_y(-25)
+        self.set_y(-20) # Moved footer down slightly
         self.set_font('Arial', 'I', 8)
         self.set_text_color(128)
         
@@ -156,7 +156,7 @@ class PDFReport(FPDF):
                       "veterinarian before administering medical treatment.")
         self.multi_cell(0, 4, disclaimer, align='C')
         
-        self.ln(2)
+        self.ln(1)
         self.cell(0, 5, f'Page {self.page_no()}', 0, 0, 'C')
 
 def clean_text(text):
@@ -168,108 +168,107 @@ def clean_text(text):
 
 def create_pdf(img_path, diagnosis, confidence, info):
     pdf = PDFReport()
-    pdf.set_auto_page_break(auto=True, margin=25)
+    pdf.set_auto_page_break(auto=True, margin=15) # Reduced margin to fit more
     pdf.add_page()
     
-    # --- SPACING: PREVIOUSLY REDUCED ---
-    pdf.ln(2) 
+    # --- NO EXTRA SPACING AFTER HEADER ---
     
     # --- SECTION 1: PATIENT / CASE INFORMATION (Grid Layout) ---
     pdf.set_font("Arial", "B", 10)
     pdf.set_fill_color(240, 240, 240) # Light Gray Header
-    pdf.cell(0, 8, "CASE INFORMATION", 1, 1, 'L', fill=True)
+    pdf.cell(0, 7, "CASE INFORMATION", 1, 1, 'L', fill=True) # Reduced Height 8->7
     
     pdf.set_font("Arial", "", 10)
     # Row 1
-    pdf.cell(35, 8, "Case ID:", 1)
-    pdf.cell(60, 8, f"TK-{random.randint(10000,99999)}", 1)
-    pdf.cell(35, 8, "Date Reported:", 1)
-    pdf.cell(60, 8, datetime.datetime.now().strftime('%Y-%m-%d'), 1, 1)
+    pdf.cell(35, 7, "Case ID:", 1)
+    pdf.cell(60, 7, f"TK-{random.randint(10000,99999)}", 1)
+    pdf.cell(35, 7, "Date Reported:", 1)
+    pdf.cell(60, 7, datetime.datetime.now().strftime('%Y-%m-%d'), 1, 1)
     # Row 2
-    pdf.cell(35, 8, "Specimen Type:", 1)
-    pdf.cell(60, 8, "Digital Skin Image", 1)
-    pdf.cell(35, 8, "Methodology:", 1)
-    pdf.cell(60, 8, "AI-Computer Vision (YOLOv11)", 1, 1)
+    pdf.cell(35, 7, "Specimen Type:", 1)
+    pdf.cell(60, 7, "Digital Skin Image", 1)
+    pdf.cell(35, 7, "Methodology:", 1)
+    pdf.cell(60, 7, "AI-Computer Vision (YOLOv11)", 1, 1)
     
-    # --- SPACING: PREVIOUSLY REDUCED ---
+    # --- REDUCED SPACING ---
     pdf.ln(2)
 
-    # --- SECTION 2: SPECIMEN IMAGE (SHRUNK) ---
+    # --- SECTION 2: SPECIMEN IMAGE (SHRUNK SIGNIFICANTLY) ---
     try:
         pdf.set_font("Arial", "B", 10)
-        pdf.cell(0, 8, "SPECIMEN ANALYZED", 0, 1, 'L')
-        # Draw box around image area (Shrunk height)
+        pdf.cell(0, 6, "SPECIMEN ANALYZED", 0, 1, 'L')
+        # Draw box around image area (Shrunk height 50->40)
         y_before_img = pdf.get_y()
-        pdf.rect(10, y_before_img, 190, 50)
-        # Image centered inside (Shrunk height)
-        pdf.image(img_path, x=80, y=y_before_img+2, h=45)
-        # Reduced spacing
-        pdf.ln(52)
+        pdf.rect(10, y_before_img, 190, 40)
+        # Image centered inside (Shrunk height 45->35)
+        pdf.image(img_path, x=80, y=y_before_img+2, h=35)
+        # Reduced spacing 52->42
+        pdf.ln(42)
     except:
         pdf.cell(0, 10, "[Image Error]", 1, 1)
 
-    pdf.ln(5)
+    pdf.ln(3)
 
     # --- SECTION 3: DIAGNOSTIC RESULT (Formal Box) ---
-    pdf.set_fill_color(230, 230, 250) # Very light blue/purple
-    pdf.rect(10, pdf.get_y(), 190, 25, 'F')
+    pdf.set_fill_color(230, 230, 250) 
+    pdf.rect(10, pdf.get_y(), 190, 20, 'F') # Reduced box height 25->20
     
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(95, 10, "DETECTED CLASSIFICATION:", 0, 0, 'R')
-    pdf.set_font("Arial", "B", 14)
-    pdf.set_text_color(0, 51, 102) # Dark Blue Result
-    pdf.cell(95, 10, f"  {clean_text(diagnosis.upper())}", 0, 1, 'L')
+    pdf.set_font("Arial", "B", 11)
+    pdf.cell(95, 8, "DETECTED CLASSIFICATION:", 0, 0, 'R')
+    pdf.set_font("Arial", "B", 13)
+    pdf.set_text_color(0, 51, 102) 
+    pdf.cell(95, 8, f"  {clean_text(diagnosis.upper())}", 0, 1, 'L')
     
     pdf.set_text_color(0)
-    pdf.set_font("Arial", "", 11)
-    pdf.cell(95, 8, "Confidence Score:", 0, 0, 'R')
-    pdf.cell(95, 8, f"  {confidence:.1f}%", 0, 1, 'L')
-    pdf.ln(10)
+    pdf.set_font("Arial", "", 10)
+    pdf.cell(95, 6, "Confidence Score:", 0, 0, 'R')
+    pdf.cell(95, 6, f"  {confidence:.1f}%", 0, 1, 'L')
+    pdf.ln(8) # Reduced spacing after result 10->8
 
     # --- SECTION 4: CLINICAL INTERPRETATION ---
     pdf.set_font("Arial", "B", 11)
     pdf.set_fill_color(240, 240, 240)
-    pdf.cell(0, 8, "CLINICAL INTERPRETATION & PROTOCOLS", 1, 1, 'L', fill=True)
-    pdf.ln(2)
+    pdf.cell(0, 7, "CLINICAL INTERPRETATION & PROTOCOLS", 1, 1, 'L', fill=True)
+    pdf.ln(1)
     
     # Severity
     pdf.set_font("Arial", "B", 10)
-    pdf.cell(30, 6, "Severity:", 0)
+    pdf.cell(30, 5, "Severity:", 0)
     pdf.set_font("Arial", "", 10)
-    pdf.cell(0, 6, clean_text(info['severity']), 0, 1)
+    pdf.cell(0, 5, clean_text(info['severity']), 0, 1)
     
-    # Cause
+    # Cause - Reduced line height 6->5
     pdf.set_font("Arial", "B", 10)
-    pdf.cell(30, 6, "Etiology:", 0)
+    pdf.cell(30, 5, "Etiology:", 0)
     pdf.set_font("Arial", "", 10)
-    pdf.multi_cell(0, 6, clean_text(info['cause']))
-    pdf.ln(2)
+    pdf.multi_cell(0, 5, clean_text(info['cause']))
+    pdf.ln(1)
 
     # --- SECTION 5: RECOMMENDED ACTION PLAN ---
     pdf.set_font("Arial", "B", 11)
-    pdf.cell(0, 8, "RECOMMENDED TREATMENT PLAN", 0, 1, 'L')
+    pdf.cell(0, 7, "RECOMMENDED TREATMENT PLAN", 0, 1, 'L')
     pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-    pdf.ln(3)
+    pdf.ln(2)
     
     pdf.set_font("Arial", "", 10)
     for i, step in enumerate(info['steps'], 1):
         clean_step = clean_text(step)
-        pdf.cell(10, 6, f"{i}.", 0, 0)
-        pdf.multi_cell(0, 6, clean_step)
-        pdf.ln(1)
+        pdf.cell(10, 5, f"{i}.", 0, 0) # Reduced cell height 6->5
+        pdf.multi_cell(0, 5, clean_step) # Reduced cell height 6->5
+        # Removed the extra ln(1) here to save space
 
-    # --- SIGNATURE BLOCK (Updated: Manual Adjustment) ---
-    pdf.ln(5) # <--- REDUCED FROM 15 TO 5 (Pulls signature up)
+    # --- SIGNATURE BLOCK (Aggressively pulled up) ---
+    pdf.ln(3) 
     
-    # Check if we are too close to the bottom (230mm)
-    if pdf.get_y() > 230:
+    # Check if we are too close to the bottom (250mm)
+    if pdf.get_y() > 250:
         pdf.add_page()
     
     pdf.set_font("Arial", "B", 10)
     pdf.cell(95, 5, "Authorized by:", 0, 0, 'C')
     pdf.cell(95, 5, "Verified by (Veterinarian):", 0, 1, 'C')
     
-    pdf.ln(10)
+    pdf.ln(8) # Reduced signing space 10->8
     pdf.set_font("Courier", "", 12)
     pdf.cell(95, 5, "/s/ TUKLAS AI SYSTEM v1.0", 0, 0, 'C')
     pdf.cell(95, 5, "__________________________", 0, 1, 'C')
