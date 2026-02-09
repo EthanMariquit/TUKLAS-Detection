@@ -11,7 +11,7 @@ import numpy as np
 
 # --- 1. PAGE CONFIGURATION ---
 st.set_page_config(
-    page_title="TUKLAS",
+    page_title="TUKLAS", # Updated as requested
     page_icon="🔬",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -42,6 +42,7 @@ lottie_microscope = load_lottieurl("https://lottie.host/0a927e36-6923-424d-8686-
 lottie_scanning = load_lottieurl("https://lottie.host/5a0c301c-6685-4841-8407-1e0078174f46/7Q1a54a72d.json") 
 
 # --- 3. MEDICAL KNOWLEDGE BASE ---
+# (Kept exactly as your original code)
 medical_data = {
     "Diamond-shaped Plaques (Erysipelas)": {
         "severity": "CRITICAL (High Mortality Risk)",
@@ -117,9 +118,10 @@ medical_data = {
 }
 
 # --- 4. PDF GENERATOR ---
+# (Kept exactly as your original code)
 class PDFReport(FPDF):
     def header(self):
-        self.set_fill_color(0, 51, 102) 
+        self.set_fill_color(0, 51, 102) # Dark Blue
         self.rect(0, 0, 210, 5, 'F')
         self.ln(5)
         self.set_font('Arial', 'B', 16)
@@ -131,7 +133,7 @@ class PDFReport(FPDF):
         self.cell(0, 5, 'Phone: (02) 8652-2197 | Email: tuklas-risci@gmail.com', 0, 1, 'L')
         self.set_y(15)
         self.set_font('Arial', 'B', 20)
-        self.set_text_color(150) 
+        self.set_text_color(150) # Gray
         self.cell(0, 10, 'LABORATORY REPORT', 0, 1, 'R')
         self.set_y(40) 
         self.set_draw_color(0)
@@ -157,8 +159,7 @@ def get_qr_code(data):
             with open("temp_qr.png", "wb") as f:
                 f.write(response.content)
             return "temp_qr.png"
-    except:
-        return None
+    except: return None
     return None
 
 def create_pdf(image_paths, diagnosis, confidence, info):
@@ -276,7 +277,7 @@ def create_pdf(image_paths, diagnosis, confidence, info):
 # --- 5. REPORT GENERATOR HELPER ---
 def generate_smart_report(detected_class, count, confidence):
     intros = [
-        f"Analysis of the uploaded specimen indicates the presence of <b>{count} distinct anomaly(anomalies)</b>.",
+        f"Analysis of the uploaded specimen indicates the presence of <b>{count} distinct anomaly/anomalies</b>.",
         f"The TUKLAS diagnostic system has flagged <b>{count} region(s) of interest</b> in this sample.",
         f"Based on visual dermatological patterns, our AI identified <b>{count} area(s)</b> requiring attention.",
         f"A thorough scan of the tissue sample reveals <b>{count} point(s) of concern</b>."
@@ -317,10 +318,20 @@ contacts_data = [
     {"LGU": "Teresa", "Office": "Municipal Agriculture Office", "Head": "Department Head", "Contact": "Walk-in Recommended", "Email": "agriculture@teresarizal.gov.ph"},
 ]
 
-# --- 7. CSS STYLING ---
+# --- 7. CSS STYLING (Including Sidebar Logic) ---
 st.markdown("""
     <style>
-    .stApp { }
+    /* Sidebar logic: 
+       Streamlit sidebar has a data-testid="stSidebar"
+    */
+    [data-testid="stSidebarNav"] { padding-top: 1rem; }
+    
+    /* Hide text elements when sidebar is naturally collapsed by Streamlit */
+    /* This uses the internal sidebar state */
+    [data-testid="stSidebar"][aria-expanded="false"] .sidebar-text-container {
+        display: none;
+    }
+
     .stButton>button {
         width: 100%;
         background-color: #0056b3;
@@ -331,13 +342,7 @@ st.markdown("""
         border: none;
     }
     .purple-box, .blue-box, .red-box, .yellow-box, .green-box {
-        padding: 16px;
-        border-radius: 5px;
-        color: inherit; 
-        font-family: 'Source Sans Pro', sans-serif;
-        margin-bottom: 10px;
-        white-space: pre-wrap;
-        line-height: 1.5; 
+        padding: 16px; border-radius: 5px; margin-bottom: 10px; white-space: pre-wrap; line-height: 1.5; 
     }
     .purple-box { background-color: rgba(106, 13, 173, 0.1); border: 1px solid #6A0DAD; }
     .blue-box { background-color: rgba(0, 86, 179, 0.1); border: 1px solid #0056b3; }
@@ -347,35 +352,15 @@ st.markdown("""
 
     .report-box {
         background-color: rgba(255, 255, 255, 0.05);
-        color: inherit;
-        padding: 25px 25px 50px 25px; 
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        border-left: 6px solid #0056b3;
-        border: 1px solid rgba(128, 128, 128, 0.2);
-        font-size: 16px;
-        line-height: 1.6;
-        margin-bottom: 10px;
+        padding: 25px; border-radius: 10px; border-left: 6px solid #0056b3;
+        border: 1px solid rgba(128, 128, 128, 0.2); font-size: 16px; line-height: 1.6; margin-bottom: 10px;
     }
-    .proto-header {
-        color: #0056b3;
-        font-weight: bold;
-        font-size: 1.1em;
-        margin-bottom: 5px;
-        margin-top: 10px;
-    }
+    .proto-header { color: #0056b3; font-weight: bold; font-size: 1.1em; margin-top: 10px; }
+    
     .footer {
-        position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        background-color: #2c3e50;
-        color: #ecf0f1;
-        text-align: center;
-        padding: 12px;
-        font-size: 13px;
-        z-index: 100;
-        border-top: 3px solid #0056b3;
+        position: fixed; left: 0; bottom: 0; width: 100%;
+        background-color: #1e1e1e; color: #ecf0f1; text-align: center;
+        padding: 12px; font-size: 13px; z-index: 100; border-top: 2px solid #333;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -399,40 +384,33 @@ else:
         return YOLO(model_path)
     model = load_model()
 
-# --- 9. SIDEBAR OPTIMIZATION (Optimized Header & Typable Selectors) ---
+# --- 9. SIDEBAR (NEW LOGIC) ---
 with st.sidebar:
-    # 9.1 Brand Header (Compact & Centered)
-    st.markdown("<div style='text-align: center; margin-top: -50px;'>", unsafe_allow_html=True)
-    if lottie_microscope:
-        st_lottie(lottie_microscope, height=100, key="sidebar_anim")
-    else:
-        st.markdown("### 🔬")
+    # Top Branding Area
+    cols = st.columns([1, 4])
+    with cols[0]:
+        # The Logo (always visible)
+        if lottie_microscope:
+            st_lottie(lottie_microscope, height=60, key="sidebar_logo")
+        else:
+            st.image("https://img.icons8.com/fluency/96/microscope.png", width=50)
     
-    st.markdown("<h2 style='margin-bottom: 0;'>TUKLAS</h2>", unsafe_allow_html=True)
-    st.caption("Veterinary Skin Lesion Analysis")
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("---")
-    
-    # 9.2 Navigation Section (Restored Typable Search)
-    with st.expander("🛠️ Main Navigation", expanded=True):
-        selected_page = st.selectbox(
-            "Go to:", 
-            ["🔍 Lesion Scanner", "📞 Local Directory"],
-            help="Type to filter tools"
-        )
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.write("**Quick Guide**")
-        st.caption("• Upload lesion photo.")
-        st.caption("• Adjust sensitivity slider.")
-        st.caption("• Review AI generated report.")
+    with cols[1]:
+        # The Text (Wrapped in a div that CSS can hide)
+        st.markdown("""
+            <div class="sidebar-text-container">
+                <b style="font-size: 1.2rem;">TUKLAS Diagnostics</b><br>
+                <small style="opacity: 0.7;">Veterinary Skin Lesion Analysis System</small>
+            </div>
+            """, unsafe_allow_html=True)
     
     st.markdown("---")
+    selected_page = st.selectbox("Navigate", ["🔍 Lesion Scanner", "📞 Local Directory"])
+    st.markdown("---")
     
-    # 9.3 Calculator Section (Restored Typable Medication Select)
+    # Rest of your sidebar (Calculator, Slider, Guide)
     st.subheader("💊 Rx Dosage Calculator")
     calc_weight = st.number_input("Pig Weight (kg)", min_value=1.0, value=50.0, step=0.5)
-    
     drug_options = ["Select Drug..."] + [v['drug_name'] for k, v in medical_data.items() if 'drug_name' in v]
     selected_drug = st.selectbox("Medication", drug_options)
     
@@ -441,27 +419,26 @@ with st.sidebar:
         if drug_info:
             vol = (calc_weight / drug_info['dosage_per_kg']) * drug_info['dosage_rate']
             st.info(f"**Administer:** {vol:.2f} mL")
-            st.caption(f"Rate: {drug_info['dosage_rate']}mL per {drug_info['dosage_per_kg']}kg")
     
     st.markdown("---")
-    
-    # 9.4 Scanner Settings
     conf_threshold = 0.25
     if selected_page == "🔍 Lesion Scanner":
         st.write("⚙️ **Scanner Settings**")
-        conf_threshold = st.slider("Sensitivity (Confidence)", 0.0, 1.0, 0.40, 0.05)
+        conf_threshold = st.slider("Sensitivity", 0.0, 1.0, 0.40, 0.05)
+        with st.expander("📖 Quick Guide", expanded=False):
+            st.write("1. Upload clear photo.")
+            st.write("2. Adjust sensitivity.")
+            st.write("3. Review report.")
 
-# --- 10. PAGE: LESION SCANNER ---
+# --- 10. PAGE LOGIC ---
 if selected_page == "🔍 Lesion Scanner":
     st.title("🔬 TUKLAS: Smart Veterinary Assistant")
     st.write("Upload a sample image to generate a diagnostic report.")
-
     uploaded_file = st.file_uploader("Upload Image", type=['jpg', 'png', 'jpeg'])
 
     if uploaded_file:
         img = Image.open(uploaded_file)
         img.save("temp_orig.jpg")
-
         col1, col2 = st.columns([1, 1])
         with col1:
             st.image(img, use_container_width=True, caption="Uploaded Specimen")
@@ -471,17 +448,13 @@ if selected_page == "🔍 Lesion Scanner":
                 st.error("Model file missing.")
             else:
                 with st.spinner("Analyzing Specimen..."):
-                    with col2:
-                        if lottie_scanning:
-                            st_lottie(lottie_scanning, height=200, key="scanning")
-                    
                     results = model.predict(img, conf=conf_threshold)
                     res_plotted = results[0].plot() 
                     img_annotated = Image.fromarray(res_plotted[..., ::-1]) 
                     img_annotated.save("temp_annotated.jpg")
                     
                     enhancer = ImageEnhance.Contrast(img)
-                    img_contrast = enhancer.enhance(1.5) 
+                    img_contrast = enhancer.enhance(1.5)
                     img_contrast.save("temp_contrast.jpg")
                     
                     img_gray = ImageOps.grayscale(img)
@@ -492,14 +465,12 @@ if selected_page == "🔍 Lesion Scanner":
                     detected_classes = [model.names[int(box.cls)] for box in results[0].boxes]
                     unique_detections = list(set(detected_classes))
                     count = len(detected_classes)
-                    
                     confidence = 0.0
                     if len(results[0].boxes) > 0:
                         confs = results[0].boxes.conf.tolist()
                         confidence = (sum(confs) / len(confs)) * 100
 
                 with col2:
-                    st.empty()
                     st.image(img_annotated, use_container_width=True, caption="AI Detection")
                     if count > 0:
                         st.write("<b>Confidence Level:</b>", unsafe_allow_html=True)
@@ -513,57 +484,50 @@ if selected_page == "🔍 Lesion Scanner":
                     det_class = unique_detections[0] 
                     report = generate_smart_report(det_class, count, confidence)
                     info = medical_data.get(det_class)
-                    if not info:
-                         for k in medical_data.keys():
-                            if k in det_class or det_class in k:
-                                info = medical_data[k]
-                                break
-
+                    
                     with st.expander("📋 AI DIAGNOSTIC REPORT", expanded=True):
                         st.markdown(f'<div class="report-box">{report}</div>', unsafe_allow_html=True)
                         if info:
                             img_list = ["temp_orig.jpg", "temp_annotated.jpg", "temp_contrast.jpg", "temp_edge.jpg"]
                             pdf_bytes = create_pdf(img_list, det_class, confidence, info)
-                            st.download_button(label="📥 Download Official Lab Report (PDF)", data=pdf_bytes, file_name=f"TUKLAS_Report.pdf", mime="application/pdf")
+                            st.download_button(
+                                label="📥 Download Official Lab Report (PDF)",
+                                data=pdf_bytes,
+                                file_name=f"TUKLAS_Report_{int(time.time())}.pdf",
+                                mime="application/pdf"
+                            )
 
                     for d in unique_detections:
                         d_info = medical_data.get(d)
-                        if not d_info:
-                            for k in medical_data.keys():
-                                if k in d or d in k:
-                                    d_info = medical_data[k]
-                                    break
                         if d_info:
                             with st.expander(f"📌 PROTOCOL: {d}", expanded=True):
                                 st.markdown(f'<b>SEVERITY:</b> <code>{d_info["severity"]}</code>', unsafe_allow_html=True)
-                                st.divider()
                                 c1, c2 = st.columns(2)
                                 with c1:
                                     st.markdown('<p class="proto-header">🧬 Origin</p>', unsafe_allow_html=True)
                                     st_blue(d_info['cause']) 
                                 with c2:
-                                    st.markdown('<p class="proto-header">💔 Clinical Impact</p>', unsafe_allow_html=True)
+                                    st.markdown('<p class="proto-header">💔 Impact</p>', unsafe_allow_html=True)
                                     st_red(d_info['harm']) 
-                                st.markdown('<p class="proto-header">💊 Treatment Protocol</p>', unsafe_allow_html=True)
-                                protocol_text = "".join([f"✅ {step}\n" for step in d_info['steps']])
+                                st.markdown('<p class="proto-header">💊 Treatment</p>', unsafe_allow_html=True)
+                                protocol_text = "".join([f"✅ {s}\n" for s in d_info['steps']])
                                 st_green(protocol_text) 
 
 elif selected_page == "📞 Local Directory":
     st.title("📞 Agricultural Support Directory")
     search_term = st.text_input("🔍 Search Municipality", "")
-    st.markdown("---")
     visible = [c for c in contacts_data if search_term.lower() in c['LGU'].lower() or search_term == ""]
+    
     col1, col2 = st.columns(2)
     for i, data in enumerate(visible):
         with col1 if i % 2 == 0 else col2:
             with st.expander(f"📍 **{data['LGU']}**", expanded=True):
                 st.write(f"**Office:** {data['Office']}")
                 st.write(f"**Phone:** `{data['Contact']}`")
-                st.write(f"**Email:** {data['Email']}")
 
 # --- FOOTER ---
 st.markdown("""
 <div class="footer">
-    <p><strong>Rizal National Science High School (RiSci)</strong> | © 2025 TUKLAS Team</p>
+    <p>© 2026 TUKLAS | Rizal National Science High School (RiSci)</p>
 </div>
 """, unsafe_allow_html=True)
