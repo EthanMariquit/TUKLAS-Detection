@@ -116,7 +116,7 @@ medical_data = {
     }
 }
 
-# --- 4. PROFESSIONAL PDF GENERATOR ---
+# --- 4. PDF GENERATOR ---
 class PDFReport(FPDF):
     def header(self):
         self.set_fill_color(0, 51, 102) 
@@ -276,7 +276,7 @@ def create_pdf(image_paths, diagnosis, confidence, info):
 # --- 5. REPORT GENERATOR HELPER ---
 def generate_smart_report(detected_class, count, confidence):
     intros = [
-        f"Analysis of the uploaded specimen indicates the presence of <b>{count} distinct anomaly/anomalies</b>.",
+        f"Analysis of the uploaded specimen indicates the presence of <b>{count} distinct anomaly(anomalies)</b>.",
         f"The TUKLAS diagnostic system has flagged <b>{count} region(s) of interest</b> in this sample.",
         f"Based on visual dermatological patterns, our AI identified <b>{count} area(s)</b> requiring attention.",
         f"A thorough scan of the tissue sample reveals <b>{count} point(s) of concern</b>."
@@ -377,8 +377,6 @@ st.markdown("""
         z-index: 100;
         border-top: 3px solid #0056b3;
     }
-    /* Styles Radio to look like a menu */
-    div[data-testid="stSidebarNav"] {display: none;}
     </style>
     """, unsafe_allow_html=True)
 
@@ -401,29 +399,35 @@ else:
         return YOLO(model_path)
     model = load_model()
 
-# --- 9. SIDEBAR ---
+# --- 9. SIDEBAR OPTIMIZATION ---
 with st.sidebar:
+    # 9.1 Brand Header (Centered)
+    st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
     if lottie_microscope:
         st_lottie(lottie_microscope, height=120, key="sidebar_anim")
     else:
         st.image("https://img.icons8.com/fluency/96/microscope.png", width=60)
-        
+    
     st.title("TUKLAS Diagnostics")
     st.caption("Veterinary Skin Lesion Analysis System")
+    st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("---")
     
-    # --- NON-TYPABLE NAVIGATION (RADIO BUTTONS) ---
-    st.write("📍 **Navigation Menu**")
-    selected_page = st.radio(
-        label="Select a tool:",
-        options=["🔍 Lesion Scanner", "📞 Local Directory"],
-        label_visibility="collapsed"
-    )
+    # 9.2 Navigation Section
+    with st.expander("🛠️ Main Controls", expanded=True):
+        selected_page = st.selectbox("Current Tool:", ["🔍 Lesion Scanner", "📞 Local Directory"])
+        
+        # Guide moved inside the control section for a cleaner look
+        st.markdown("---")
+        st.write("**Quick Guide**")
+        st.caption("1. Upload lesion photo.")
+        st.caption("2. Adjust sensitivity slider.")
+        st.caption("3. Review AI report.")
     
     st.markdown("---")
+    
+    # 9.3 Calculator Section
     st.subheader("💊 Rx Dosage Calculator")
-    st.caption("Calculate injection volume based on body weight.")
-    
     calc_weight = st.number_input("Pig Weight (kg)", min_value=1.0, value=50.0, step=0.5)
     drug_options = ["Select Drug..."] + [v['drug_name'] for k, v in medical_data.items() if 'drug_name' in v]
     selected_drug = st.selectbox("Medication", drug_options)
@@ -433,21 +437,15 @@ with st.sidebar:
         if drug_info:
             vol = (calc_weight / drug_info['dosage_per_kg']) * drug_info['dosage_rate']
             st.info(f"**Administer:** {vol:.2f} mL")
-            st.caption(f"Dosage Rate: {drug_info['dosage_rate']}mL per {drug_info['dosage_per_kg']}kg")
+            st.caption(f"Rate: {drug_info['dosage_rate']}mL per {drug_info['dosage_per_kg']}kg")
     
     st.markdown("---")
+    
+    # 9.4 Scanner Settings
     conf_threshold = 0.25
     if selected_page == "🔍 Lesion Scanner":
         st.write("⚙️ **Scanner Settings**")
         conf_threshold = st.slider("Sensitivity", 0.0, 1.0, 0.40, 0.05)
-        
-        # --- QUICK GUIDE (OPEN BY DEFAULT) ---
-        st.markdown("---")
-        with st.expander("📖 Quick Guide", expanded=True):
-            st.write("1. **Upload** a clear photo of the skin lesion.")
-            st.write("2. **Adjust** sensitivity if detection is too weak/strong.")
-            st.write("3. **Review** the AI analysis and generated report.")
-            st.write("4. **Consult** a licensed vet for final diagnosis.")
 
 # --- 10. PAGE: LESION SCANNER ---
 if selected_page == "🔍 Lesion Scanner":
@@ -522,12 +520,7 @@ if selected_page == "🔍 Lesion Scanner":
                         if info:
                             img_list = ["temp_orig.jpg", "temp_annotated.jpg", "temp_contrast.jpg", "temp_edge.jpg"]
                             pdf_bytes = create_pdf(img_list, det_class, confidence, info)
-                            st.download_button(
-                                label="📥 Download Official Lab Report (PDF)",
-                                data=pdf_bytes,
-                                file_name=f"TUKLAS_Report_{int(time.time())}.pdf",
-                                mime="application/pdf"
-                            )
+                            st.download_button(label="📥 Download Official Lab Report (PDF)", data=pdf_bytes, file_name=f"TUKLAS_Report.pdf", mime="application/pdf")
 
                     for d in unique_detections:
                         d_info = medical_data.get(d)
@@ -538,23 +531,15 @@ if selected_page == "🔍 Lesion Scanner":
                                     break
                         if d_info:
                             with st.expander(f"📌 PROTOCOL: {d}", expanded=True):
-                                st.markdown(f'<p style="margin-bottom: 0px;"><b>SEVERITY STATUS:</b> <code>{d_info["severity"]}</code></p>', unsafe_allow_html=True)
+                                st.markdown(f'<b>SEVERITY:</b> <code>{d_info["severity"]}</code>', unsafe_allow_html=True)
                                 st.divider()
                                 c1, c2 = st.columns(2)
                                 with c1:
-                                    st.markdown('<p class="proto-header">🧬 Origin & Transmission</p>', unsafe_allow_html=True)
+                                    st.markdown('<p class="proto-header">🧬 Origin</p>', unsafe_allow_html=True)
                                     st_blue(d_info['cause']) 
                                 with c2:
                                     st.markdown('<p class="proto-header">💔 Clinical Impact</p>', unsafe_allow_html=True)
                                     st_red(d_info['harm']) 
-                                c3, c4 = st.columns(2)
-                                with c3:
-                                    st.markdown('<p class="proto-header">🧰 Required Supplies</p>', unsafe_allow_html=True)
-                                    st_yellow(d_info['materials']) 
-                                with c4:
-                                    st.markdown('<p class="proto-header">🛡️ Bio-Security & Prevention</p>', unsafe_allow_html=True)
-                                    st_purple(d_info["prevention"])
-                                st.divider()
                                 st.markdown('<p class="proto-header">💊 Treatment Protocol</p>', unsafe_allow_html=True)
                                 protocol_text = "".join([f"✅ {step}\n" for step in d_info['steps']])
                                 st_green(protocol_text) 
@@ -564,23 +549,17 @@ elif selected_page == "📞 Local Directory":
     search_term = st.text_input("🔍 Search Municipality", "")
     st.markdown("---")
     visible = [c for c in contacts_data if search_term.lower() in c['LGU'].lower() or search_term == ""]
-    if len(visible) == 0:
-        st_yellow("No offices found matching your search.")
     col1, col2 = st.columns(2)
     for i, data in enumerate(visible):
         with col1 if i % 2 == 0 else col2:
             with st.expander(f"📍 **{data['LGU']}**", expanded=True):
                 st.write(f"**Office:** {data['Office']}")
-                st.write(f"**Head:** {data['Head']}")
                 st.write(f"**Phone:** `{data['Contact']}`")
                 st.write(f"**Email:** {data['Email']}")
 
 # --- FOOTER ---
 st.markdown("""
 <div class="footer">
-    <p><strong>Rizal National Science High School (RiSci)</strong><br>
-    📍 J.P. Rizal St., Batingan, Binangonan, Rizal<br>
-    📞 (02) 8652-2197 | ✉️ rnshs.admin@deped.gov.ph<br>
-    © 2025 Student Research Project | TUKLAS Team</p>
+    <p><strong>Rizal National Science High School (RiSci)</strong> | © 2025 TUKLAS Team</p>
 </div>
 """, unsafe_allow_html=True)
